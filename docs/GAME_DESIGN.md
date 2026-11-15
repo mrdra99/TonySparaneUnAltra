@@ -22,7 +22,7 @@ Esplora la piazza → parla con gli NPC (`E`) → scegli le risposte → il **Ca
 
 0–100, clamp. Esempi: storia minore +5, improbabile +10, leggendaria +20, scusa improvvisata +3.
 Soglie e messaggi esatti: **25** "Tony sta prendendo confidenza." · **50** "La piazza inizia a dubitare." · **75** "Livello leggenda urbana." ·
-**100** "TONY NE HA SPARATA UN'ALTRA!" → finale. I guadagni da frasi casuali valgono una volta per frase (anti-farming).
+**100** "TONY NE HA SPARATA UN'ALTRA!" → finale. **Tetto a 95** finché non si è vissuta "La notte dell'Intercity" (§4b): solo il K.O. tecnico finale porta a 100. I guadagni da frasi casuali valgono una volta per frase (anti-farming).
 
 ## 4. Missioni (contenuto completo dopo la vertical slice)
 
@@ -36,6 +36,22 @@ Soglie e messaggi esatti: **25** "Tony sta prendendo confidenza." · **50** "La 
 | 6   | Tony World Tour                                        | 4 storie (Vladivostok, pupazzo segreto, gabbia dei criceti, treno ungherese) sbloccate da 4 punti nella piazza | +20, "Cittadino del mondo"        |
 
 **Vertical slice (prima)**: missione 1 completa dall'inizio alla fine, poi le altre. Obiettivi e id sono definiti in `src/data/missions`.
+
+## 4b. Livello finale — "La notte dell'Intercity"
+
+Dopo aver completato le missioni 1-6 la piazza propone **"RACCONTA LA NOTTE DELL'INTERCITY"** (prima: "Prima finisci le altre
+storie"). È un flashback in tre tappe, ognuna con la sua cartolina di transizione:
+
+1. **Pisa, binario.** Tony ha perso il regionale: serve l'Intercity. Bogdan presta i 40 €. Countdown di 90 s: se scade il treno
+   "ritarda di 5 minuti, come sempre", nessun game over.
+2. **Viareggio, piazzale.** Il taxi per Torre del Lago costa 35 €: colletta alla romana con Nico, Vale, Ricky e Bogdan
+   (7 € a testa); la portiera del taxi si sblocca solo a colletta finita.
+3. **Torre del Lago di notte.** Tony fa a Bogdan un'ultima, piccola richiesta. Bogdan perde la pazienza: scena del **K.O.
+   tecnico** (campanello, caduta al rallentatore, conteggio, banner) con tono da cartone animato, senza violenza.
+
+Solo alla fine della scena si accende il flag permanente `finale.ko`: il Cazzatometro, fermo a **95**, sale a **100** e parte la
+celebrazione con la schermata finale. Ricompense: missione `notte-intercity` (+300 punti, achievement "K.O. tecnico", storia
+"La notte dell'Intercity"). Il flashback non assegna Cazzatometro: il 100 arriva solo dal K.O.
 
 ## 5. NPC e "TUTTI GUARDANO TONY"
 

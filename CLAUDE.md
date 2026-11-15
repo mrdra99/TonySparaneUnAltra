@@ -21,6 +21,8 @@ localStorage con schema versionato (`src/game/core/save.ts`). Alias `@/` = `src/
 - `src/game/{dialogue,progression}`: logica pura testata (motore dialoghi, effetti, Cazzatometro).
 - `src/store/runtime.ts`: dati per-frame mutabili. `src/store/gameStore.ts`: stato reattivo.
 - `src/world/`: piazza, luci, modelli NPC e prop. `src/game/entities/TonyModel.tsx`: Tony, sostituibile con un GLB.
+- `src/levels/intercity/`: livello finale "La notte dell'Intercity" (Pisa, Viareggio, Torre del Lago): `data/` (cast,
+  dialoghi, missione, speaker extra), `logic/` pura, `env/`, `actors/`. Il Cazzatometro è a tetto 95 finché non scatta il K.O. tecnico.
 - `src/data/`: NPC, dialoghi, missioni, storie, frasi casuali. Si aggiungono contenuti qui, non nel codice.
 - `src/ui/`: menu, HUD, dialoghi, notifiche, comandi touch. `src/audio/sfx.ts`: SFX sintetizzati con WebAudio.
 
