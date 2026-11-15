@@ -1,0 +1,26 @@
+# dipendenze e build
+node_modules
+dist
+*.local
+*.tsbuildinfo
+
+# test
+coverage
+test-results
+playwright-report
+blob-report
+playwright/.cache
+
+# deploy
+.vercel
+
+# cartella privata dell utente (foto originali)
+Foto/
+
+# editor / OS
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea
+npm-debug.log*
