@@ -1,0 +1,65 @@
+.root {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-loading);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: var(--ui-ink);
+  pointer-events: auto;
+  font-family: var(--font-body);
+}
+
+.card {
+  width: min(100%, 420px);
+  text-align: center;
+}
+
+.title {
+  margin: 0 0 22px;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 7vw, 2.2rem);
+  letter-spacing: 0.05em;
+  color: var(--ui-paper);
+  transform: rotate(var(--ui-tilt));
+}
+
+.tony {
+  color: var(--ui-orange);
+  font-size: 1.5em;
+  text-shadow: 3px 3px 0 var(--ui-teal);
+}
+
+.track {
+  height: 22px;
+  overflow: hidden;
+  border: 3px solid var(--ui-paper);
+  border-radius: 6px;
+  background: var(--ui-ink-soft);
+}
+
+.fill {
+  height: 100%;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--ui-yellow) 0 10px,
+    var(--ui-orange) 10px 20px
+  );
+  background-size: 28px 28px;
+  transition: width 0.3s ease-out;
+  animation: slide 0.8s linear infinite;
+}
+
+.text {
+  margin: 14px 0 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--ui-paper);
+}
+
+@keyframes slide {
+  to {
+    background-position: 28px 0;
+  }
+}

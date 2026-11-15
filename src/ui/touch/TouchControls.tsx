@@ -1,120 +1,203 @@
 // OWNER: UI/UX
-// Stub funzionante (Architecture). Montato SOLO se useDeviceProfile().isTouch e fase 'playing'.
-// Scrive nell'input unificato (mai eventi DOM verso i consumer):
-//   joystick sinistro  -> input.setJoystick(x, y)  con y > 0 = avanti (schermo: su); reset su up/cancel
-//   area destra (drag) -> input.addLookDelta(dx, dy) in pixel CSS
-//   pulsante contestuale -> input.trigger('interact'), etichetta = store.nearbyPrompt
-//   pulsanti pausa/missioni -> input.trigger('pause' | 'missions'); corsa: auto oltre 0.85 o setTouchRun
-// Requisiti: target >= 44px, rispetto delle safe-area (--safe-*), touch-action: none, nessun hover-only.
-import { useRef, type PointerEvent as ReactPointerEvent } from 'react';
+// Controlli touch (montati SOLO su dispositivi touch e in fase 'playing'; in dialogo resta solo il pannello).
+// Scrivono nell'input unificato (mai eventi DOM verso i consumer):
+//   joystick FLOTTANTE nella meta' sinistra -> input.setJoystick(x, y), y > 0 = avanti; la base appare
+//                                              dove si tocca e segue il pollice entro il raggio
+//   area destra (drag)                      -> input.addLookDelta(dx, dy) in pixel CSS
+//   pulsante contestuale                    -> input.trigger('interact'), etichetta = store.nearbyPrompt
+//   CORRI (tenuto premuto)                  -> input.setTouchRun(true|false); la corsa e' anche automatica
+//                                              oltre l'85% del joystick
+//   pausa / missioni                        -> input.trigger('pause' | 'missions')
+// Multi-touch: ogni controllo segue il PROPRIO pointerId, quindi joystick, look e pulsanti funzionano insieme.
+import { useEffect, useRef, type PointerEvent as ReactPointerEvent } from 'react';
+import { Hand, ListChecks, Pause, Zap } from 'lucide-react';
 import { input } from '@/game/core/input';
 import { useDeviceProfile } from '@/hooks/useDeviceProfile';
 import { useGameStore } from '@/store/gameStore';
+import styles from './TouchControls.module.css';
 
+/** Raggio massimo (px CSS) di spostamento del pollice. */
 const JOY_RADIUS = 56;
 
-export function TouchControls() {
-  const { isTouch } = useDeviceProfile();
-  const phase = useGameStore((s) => s.phase);
-  const prompt = useGameStore((s) => s.nearbyPrompt);
-  const joyOrigin = useRef<{ id: number; x: number; y: number } | null>(null);
-  const lookLast = useRef<{ id: number; x: number; y: number } | null>(null);
+interface Tracked {
+  id: number;
+  x: number;
+  y: number;
+}
 
-  if (!isTouch || phase !== 'playing') return null;
+function TouchLayer() {
+  const prompt = useGameStore((s) => s.nearbyPrompt);
+  const promptDisabled = useGameStore((s) => s.nearbyPromptDisabled);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const baseRef = useRef<HTMLDivElement>(null);
+  const thumbRef = useRef<HTMLDivElement>(null);
+  const runRef = useRef<HTMLButtonElement>(null);
+  const joy = useRef<Tracked | null>(null);
+  const look = useRef<Tracked | null>(null);
+  const runId = useRef<number | null>(null);
+
+  // Alla smontatura (cambio fase: dialogo, pausa, menu) rilascia tutto.
+  useEffect(
+    () => () => {
+      input.setJoystick(0, 0);
+      input.setTouchRun(false);
+    },
+    [],
+  );
+
+  const showJoystick = (visible: boolean, x = 0, y = 0): void => {
+    const base = baseRef.current;
+    const root = rootRef.current;
+    if (!base || !root) return;
+    base.dataset['active'] = visible ? 'true' : 'false';
+    if (visible) {
+      const r = root.getBoundingClientRect();
+      base.style.transform = `translate(${x - r.left}px, ${y - r.top}px)`;
+    }
+    const thumb = thumbRef.current;
+    if (thumb) thumb.style.transform = 'translate(0px, 0px)';
+  };
 
   const joyDown = (e: ReactPointerEvent<HTMLDivElement>): void => {
+    if (joy.current) return;
     e.currentTarget.setPointerCapture(e.pointerId);
-    joyOrigin.current = { id: e.pointerId, x: e.clientX, y: e.clientY };
+    joy.current = { id: e.pointerId, x: e.clientX, y: e.clientY };
+    showJoystick(true, e.clientX, e.clientY);
   };
   const joyMove = (e: ReactPointerEvent<HTMLDivElement>): void => {
-    const o = joyOrigin.current;
+    const o = joy.current;
     if (!o || o.id !== e.pointerId) return;
-    input.setJoystick((e.clientX - o.x) / JOY_RADIUS, -(e.clientY - o.y) / JOY_RADIUS);
+    let dx = e.clientX - o.x;
+    let dy = e.clientY - o.y;
+    const len = Math.hypot(dx, dy);
+    if (len > JOY_RADIUS) {
+      dx = (dx / len) * JOY_RADIUS;
+      dy = (dy / len) * JOY_RADIUS;
+    }
+    input.setJoystick(dx / JOY_RADIUS, -dy / JOY_RADIUS);
+    const thumb = thumbRef.current;
+    if (thumb) thumb.style.transform = `translate(${dx}px, ${dy}px)`;
   };
   const joyUp = (e: ReactPointerEvent<HTMLDivElement>): void => {
-    if (joyOrigin.current?.id !== e.pointerId) return;
-    joyOrigin.current = null;
+    if (joy.current?.id !== e.pointerId) return;
+    joy.current = null;
     input.setJoystick(0, 0);
+    showJoystick(false);
   };
+
   const lookDown = (e: ReactPointerEvent<HTMLDivElement>): void => {
+    if (look.current) return;
     e.currentTarget.setPointerCapture(e.pointerId);
-    lookLast.current = { id: e.pointerId, x: e.clientX, y: e.clientY };
+    look.current = { id: e.pointerId, x: e.clientX, y: e.clientY };
   };
   const lookMove = (e: ReactPointerEvent<HTMLDivElement>): void => {
-    const l = lookLast.current;
+    const l = look.current;
     if (!l || l.id !== e.pointerId) return;
     input.addLookDelta(e.clientX - l.x, e.clientY - l.y);
     l.x = e.clientX;
     l.y = e.clientY;
   };
   const lookUp = (e: ReactPointerEvent<HTMLDivElement>): void => {
-    if (lookLast.current?.id === e.pointerId) lookLast.current = null;
+    if (look.current?.id === e.pointerId) look.current = null;
   };
 
-  const zone = {
-    position: 'absolute',
-    bottom: 0,
-    top: '30%',
-    touchAction: 'none',
-    pointerEvents: 'auto',
-  } as const;
+  const runDown = (e: ReactPointerEvent<HTMLButtonElement>): void => {
+    if (runId.current !== null) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    runId.current = e.pointerId;
+    input.setTouchRun(true);
+    runRef.current?.setAttribute('data-pressed', 'true');
+  };
+  const runUp = (e: ReactPointerEvent<HTMLButtonElement>): void => {
+    if (runId.current !== e.pointerId) return;
+    runId.current = null;
+    input.setTouchRun(false);
+    runRef.current?.setAttribute('data-pressed', 'false');
+  };
+
+  const noMenu = (e: { preventDefault(): void }): void => e.preventDefault();
+
   return (
-    <div style={{ position: 'absolute', inset: 0, touchAction: 'none' }}>
+    <div ref={rootRef} className={styles.root} onContextMenu={noMenu}>
       <div
-        style={{ ...zone, left: 0, width: '40%' }}
+        className={styles.moveZone}
         onPointerDown={joyDown}
         onPointerMove={joyMove}
         onPointerUp={joyUp}
         onPointerCancel={joyUp}
+        onLostPointerCapture={joyUp}
       />
       <div
-        style={{ ...zone, right: 0, width: '45%' }}
+        className={styles.lookZone}
         onPointerDown={lookDown}
         onPointerMove={lookMove}
         onPointerUp={lookUp}
         onPointerCancel={lookUp}
+        onLostPointerCapture={lookUp}
       />
-      {prompt && (
+
+      {/* indicatore fisso del joystick (aiuta a capire dove toccare) + base flottante */}
+      <div className={styles.joyHint} aria-hidden="true" />
+      <div ref={baseRef} className={styles.joyBase} data-active="false" aria-hidden="true">
+        <div ref={thumbRef} className={styles.joyThumb} />
+      </div>
+
+      <div className={styles.topButtons}>
         <button
-          style={{
-            position: 'absolute',
-            right: 'calc(var(--safe-right, 0px) + 16px)',
-            bottom: 'calc(var(--safe-bottom, 0px) + 16px)',
-            minHeight: 56,
-            minWidth: 56,
-            pointerEvents: 'auto',
-          }}
-          onClick={() => input.trigger('interact')}
+          type="button"
+          className={styles.roundBtn}
+          aria-label="Missioni"
+          onClick={() => input.trigger('missions')}
         >
-          {prompt}
+          <ListChecks size={22} strokeWidth={3} aria-hidden="true" />
         </button>
-      )}
-      <button
-        style={{
-          position: 'absolute',
-          top: 'var(--safe-top, 0px)',
-          left: '50%',
-          minHeight: 44,
-          minWidth: 44,
-          pointerEvents: 'auto',
-        }}
-        onClick={() => input.trigger('pause')}
-      >
-        II
-      </button>
-      <button
-        style={{
-          position: 'absolute',
-          top: 'calc(var(--safe-top, 0px) + 52px)',
-          right: 'var(--safe-right, 0px)',
-          minHeight: 44,
-          minWidth: 44,
-          pointerEvents: 'auto',
-        }}
-        onClick={() => input.trigger('missions')}
-      >
-        M
-      </button>
+        <button
+          type="button"
+          className={styles.roundBtn}
+          aria-label="Pausa"
+          onClick={() => input.trigger('pause')}
+        >
+          <Pause size={22} strokeWidth={3} aria-hidden="true" />
+        </button>
+      </div>
+
+      <div className={styles.actions}>
+        <button
+          ref={runRef}
+          type="button"
+          className={styles.run}
+          data-pressed="false"
+          aria-label="Corri (tieni premuto)"
+          onPointerDown={runDown}
+          onPointerUp={runUp}
+          onPointerCancel={runUp}
+          onLostPointerCapture={runUp}
+        >
+          <Zap size={22} strokeWidth={3} aria-hidden="true" />
+          <span>CORRI</span>
+        </button>
+        <button
+          type="button"
+          className={`${styles.interact} ${prompt ? styles.hasPrompt : ''} ${
+            promptDisabled ? styles.unavailable : ''
+          }`}
+          aria-label={prompt ?? 'Interagisci'}
+          aria-disabled={!prompt || promptDisabled}
+          onClick={() => {
+            if (prompt) input.trigger('interact');
+          }}
+        >
+          <Hand size={26} strokeWidth={3} aria-hidden="true" />
+          {prompt && <span className={styles.promptText}>{prompt}</span>}
+        </button>
+      </div>
     </div>
   );
+}
+
+export function TouchControls() {
+  const { isTouch } = useDeviceProfile();
+  const phase = useGameStore((s) => s.phase);
+  if (!isTouch || phase !== 'playing') return null;
+  return <TouchLayer />;
 }
