@@ -51,15 +51,20 @@ describe('shell UI', () => {
     act(() => {
       gameStore.getState().newGame();
       gameStore.getState().finishIntro();
-      gameStore.getState().startDialogue('marco-cinque-euro');
+      gameStore.getState().startDialogue('marco-ieri');
     });
-    expect(screen.getByText('Oh Tony, ma alla fine quei cinque euro?')).toBeInTheDocument();
-    fireEvent.click(screen.getByText(/Fra, te li do domani/));
-    expect(screen.getByText(/Domani, sempre domani/)).toBeInTheDocument();
+    expect(screen.getByText(/mi lasci una cannetta per la ninna canna/)).toBeInTheDocument();
+    act(() => input.trigger('advance'));
+    expect(screen.getByText('Tony, ma quella di ieri?')).toBeInTheDocument();
+    fireEvent.click(screen.getByText(/Fra, quella era un.altra storia/));
+    expect(screen.getByText(/più storie che scontrini/)).toBeInTheDocument();
     act(() => input.trigger('advance'));
     expect(screen.getByText('Oh fraaaa, ci vediamo.')).toBeInTheDocument();
     act(() => input.trigger('advance'));
     expect(gameStore.getState().phase).toBe('playing');
-    expect(gameStore.getState().progress.missions['ninna-canna']?.status).toBe('completed');
+    // un solo NPC su tre: la missione e' ancora in corso (1/3)
+    expect(gameStore.getState().progress.missions['ninna-canna']?.completedObjectives).toEqual([
+      'talk-marco',
+    ]);
   });
 });
