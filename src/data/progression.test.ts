@@ -3,6 +3,10 @@ import { INTERACTABLE_OVERRIDES } from '@/data/interactables';
 import { effectiveInteractables } from '@/game/systems/interactableOverrides';
 import { newGameProgress, extremeOutcome, playDialogueId } from '@/game/quests/simulate';
 import { getCurrentMission } from '@/game/quests/selectors';
+import { FINALE_MISSION_ID } from '@/levels/intercity/logic/ids';
+
+/** Missioni principali: tutte tranne il livello finale (La notte dell'Intercity), che ha un test suo. */
+const MAIN_MISSIONS = content.missionOrder.filter((id) => id !== FINALE_MISSION_ID);
 
 /** Ordine di una partita "lineare" completa (le missioni si avviano in catena). */
 const FULL_RUN = [
@@ -34,10 +38,11 @@ describe('progressione e bilancio del Cazzatometro', () => {
   it('tutte le 6 missioni si completano in ordine, anche col percorso peggiore', () => {
     for (const mode of ['min', 'max'] as const) {
       const p = run(mode);
-      for (const id of content.missionOrder) {
+      for (const id of MAIN_MISSIONS) {
         expect(p.missions[id]?.status, `${mode}: ${id}`).toBe('completed');
       }
       expect(p.unlockedAchievements).toHaveLength(5);
+      expect(MAIN_MISSIONS).toHaveLength(6);
     }
   });
 
@@ -72,7 +77,8 @@ describe('progressione e bilancio del Cazzatometro', () => {
   it('le storie del registro sono tutte sbloccabili e il punteggio e alto', () => {
     const p = run('min');
     const missing = content.storyOrder.filter(
-      (s) => !p.unlockedStories.includes(s) && s !== 'story-matite',
+      (s) =>
+        !p.unlockedStories.includes(s) && s !== 'story-matite' && s !== 'story-notte-intercity',
     );
     expect(missing).toEqual([]);
     expect(p.score).toBeGreaterThan(1000);

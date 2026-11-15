@@ -8,10 +8,12 @@ import { gameStore, useGameStore } from '@/store/gameStore';
 export function PhaseTimers() {
   const phase = useGameStore((s) => s.phase);
   const reduced = useGameStore((s) => s.settings.reducedMotion);
+  // durante la cartolina fra i livelli la fase 'intro' la chiude l'overlay, non il timer
+  const inTransition = useGameStore((s) => s.levelTransition !== null);
 
   useEffect(() => {
     const k = reduced ? 0.5 : 1;
-    if (phase === 'intro') {
+    if (phase === 'intro' && !inTransition) {
       const t = window.setTimeout(() => gameStore.getState().finishIntro(), INTRO_DURATION_MS * k);
       return () => window.clearTimeout(t);
     }
@@ -23,7 +25,7 @@ export function PhaseTimers() {
       return () => window.clearTimeout(t);
     }
     return undefined;
-  }, [phase, reduced]);
+  }, [phase, reduced, inTransition]);
 
   return null;
 }
