@@ -32,6 +32,7 @@ import {
 import { CylinderGeometry } from 'three';
 import {
   type Part,
+  type PartOpts,
   blob,
   box,
   cone,
@@ -83,7 +84,7 @@ const FOREARM = 0.27;
 // --------------------------------------------------------------------------------------
 // Geometrie (fuse con vertex color: pochi draw call)
 // --------------------------------------------------------------------------------------
-interface TonyGeometries {
+export interface TonyGeometries {
   hips: BufferGeometry;
   thigh: BufferGeometry;
   shin: BufferGeometry;
@@ -95,7 +96,8 @@ interface TonyGeometries {
   backText: BufferGeometry;
 }
 
-function buildTony(): TonyGeometries {
+/** Geometrie procedurali di Tony (esportata per i test sulla forma dei capelli). */
+export function buildTony(): TonyGeometries {
   // bacino
   const hips = mergeParts([sphere(0.18, JEANS, { pos: [0, 0, 0], scale: [1.15, 0.8, 0.86] }, 10)]);
 
@@ -209,42 +211,64 @@ function buildTony(): TonyGeometries {
     ); // sopracciglio folto
     H.push(box(0.07, 0.014, 0.02, SKIN_SHADE, { pos: [sx * 0.058, cy + 0.052, 0.135] })); // palpebra pesante
   }
-  // capelli: ai lati corti, sopra piu' lunghi e spettinati
+  // capelli (rif. over-shoulder.jpg): ai lati e dietro scuri e CORTI, sopra piu' lunghi e
+  // spettinati, ciuffo morbido portato all'indietro (niente chignon, niente punte verticali).
+  // Il guscio e' diviso in tre calotte adiacenti (fronte / lati / nuca) con raggio appena
+  // sopra il cranio; la fronte resta libera sotto l'attaccatura (theta < 0.27 pi).
+  const hairOpts: PartOpts = { pos: [0, cy + 0.004, -0.004], scale: [0.98, 1.12, 1.02] };
+  const FRONT_HALF = 1.0; // semi-ampiezza (rad) del settore frontale attorno a +Z
+  const sideStart = Math.PI / 2 + FRONT_HALF;
+  const sideLen = Math.PI * 2 - 2 * FRONT_HALF;
   H.push(
     sphereArc(
       0.157,
       HAIR,
-      [0, Math.PI * 2, 0, Math.PI * 0.46],
-      { pos: [0, cy + 0.004, -0.004], rot: [-0.36, 0, 0], scale: [0.98, 1.12, 1.02] },
+      [Math.PI / 2 - FRONT_HALF, 2 * FRONT_HALF, 0, Math.PI * 0.27],
+      hairOpts,
       14,
     ),
-  );
-  H.push(blob(0.1, HAIR, { pos: [0, cy + 0.15, 0.03], scale: [1.0, 0.55, 1.3] }, 1)); // ciuffo
-  for (let i = 0; i < 6; i++) {
-    const a = ((i - 2.5) / 6) * 1.5;
-    H.push(
-      cone(
-        0.022,
-        0.07,
-        HAIR,
-        { pos: [Math.sin(a) * 0.1, cy + 0.2, 0.06 + Math.cos(a) * 0.05], rot: [0.5, 0, -a] },
-        4,
-      ),
-    );
+  ); // attaccatura
+  H.push(sphereArc(0.157, HAIR, [sideStart, sideLen, 0, Math.PI * 0.46], hairOpts, 14)); // lati e dietro, corti
+  H.push(
+    sphereArc(
+      0.157,
+      HAIR,
+      [Math.PI + 0.6, Math.PI - 1.2, Math.PI * 0.46, Math.PI * 0.22],
+      hairOpts,
+      14,
+    ),
+  ); // nuca
+  // massa piu' lunga sopra: volume morbido e appiattito, spinto all'indietro
+  H.push(blob(0.1, HAIR, { pos: [0, cy + 0.148, -0.01], scale: [1.0, 0.5, 1.35] }, 1));
+  H.push(
+    blob(
+      0.07,
+      HAIR,
+      { pos: [0.01, cy + 0.13, 0.07], rot: [-0.3, 0, 0], scale: [1.2, 0.55, 1.0] },
+      1,
+    ),
+  ); // ciuffo frontale
+  H.push(blob(0.07, HAIR, { pos: [0, cy + 0.13, -0.09], scale: [1.1, 0.6, 1.2] }, 1)); // volume dietro
+  // qualche ciocca spettinata, bassa e inclinata all'indietro (mai dritta verso l'alto)
+  for (const [x, y, z, rx, rz] of [
+    [0.06, 0.17, -0.02, -1.2, -0.5],
+    [-0.05, 0.17, 0.02, -1.1, 0.6],
+    [0.02, 0.18, 0.06, -0.9, 0.1],
+  ] as const) {
+    H.push(cone(0.022, 0.075, HAIR, { pos: [x, cy + y, z], rot: [rx, 0, rz] }, 4));
   }
-  // occhiali da sole appoggiati sulla testa (sopra l'attaccatura dei capelli)
-  H.push(
-    box(0.085, 0.018, 0.055, '#101113', { pos: [-0.05, cy + 0.225, 0.075], rot: [-0.7, 0, 0.05] }),
-  );
-  H.push(
-    box(0.085, 0.018, 0.055, '#101113', { pos: [0.05, cy + 0.225, 0.075], rot: [-0.7, 0, -0.05] }),
-  );
-  H.push(box(0.035, 0.01, 0.014, '#101113', { pos: [0, cy + 0.23, 0.08], rot: [-0.7, 0, 0] }));
+  // occhiali da sole appoggiati sulla testa, sul ciuffo (come in foto), stanghette bianche
   for (const sx of [-1, 1]) {
     H.push(
+      box(0.075, 0.014, 0.05, '#101113', {
+        pos: [sx * 0.05, cy + 0.205, -0.04],
+        rot: [0.15, 0, sx * -0.05],
+      }),
+    );
+    H.push(
       limb(
-        [sx * 0.092, cy + 0.215, 0.06],
-        [sx * 0.13, cy + 0.15, -0.04],
+        [sx * 0.088, cy + 0.2, -0.05],
+        [sx * 0.108, cy + 0.14, -0.03],
         0.007,
         0.007,
         '#f2f2f2',
@@ -253,6 +277,7 @@ function buildTony(): TonyGeometries {
       ),
     );
   }
+  H.push(box(0.03, 0.01, 0.014, '#101113', { pos: [0, cy + 0.208, -0.04] }));
 
   // bocca (mesh separata: si anima durante il parlato)
   const mouth = mergeParts([sphere(0.026, '#6e2a2a', { scale: [1.5, 1, 0.5] }, 6)]);
