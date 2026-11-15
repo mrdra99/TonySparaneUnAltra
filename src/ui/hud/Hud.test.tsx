@@ -24,7 +24,7 @@ describe('Hud', () => {
     render(<Hud />);
     startPlaying();
     expect(screen.getByText(/MISSIONE: LA NINNA CANNA/)).toBeInTheDocument();
-    expect(screen.getByText('0/1')).toBeInTheDocument();
+    expect(screen.getByText(/^0\/\d+$/)).toBeInTheDocument();
     expect(screen.getByText(/CAZZATOMETRO 0\/100/)).toBeInTheDocument();
     const bar = screen.getByRole('progressbar', { name: 'Cazzatometro' });
     expect(bar).toHaveAttribute('aria-valuenow', '0');

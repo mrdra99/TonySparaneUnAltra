@@ -1,7 +1,10 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { input } from '@/game/core/input';
 import { gameStore } from '@/store/gameStore';
+import { installUiTestDialogue } from '@/tests/uiFixtures';
 import { DialoguePanel } from './DialoguePanel';
+
+installUiTestDialogue();
 
 const LINE = 'Oh Tony, ma alla fine quei cinque euro?';
 
