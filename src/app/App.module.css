@@ -1,0 +1,22 @@
+.root {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #1b2a2f;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+}
+
+/* Overlay HTML sopra il canvas: non cattura input, i figli abilitano pointer-events dove serve. */
+.overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+  box-sizing: border-box;
+  color: #fff;
+}

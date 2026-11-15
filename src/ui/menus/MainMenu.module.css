@@ -1,0 +1,164 @@
+.root {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-menu);
+  display: flex;
+  align-items: stretch;
+  padding: calc(var(--safe-top) + 14px) calc(var(--safe-right) + 14px)
+    calc(var(--safe-bottom) + 14px) calc(var(--safe-left) + 14px);
+  pointer-events: none;
+  font-family: var(--font-body);
+}
+
+/* Colonna a sinistra: la scena resta visibile a destra. */
+.column {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+  width: min(100%, 410px);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 6px 8px 10px 2px;
+  pointer-events: none;
+}
+
+.poster {
+  position: relative;
+  padding: 16px 18px 18px;
+  background: var(--ui-ink);
+  border: 3px solid var(--ui-paper);
+  border-radius: 6px;
+  box-shadow: 6px 6px 0 var(--ui-orange);
+  transform: rotate(var(--ui-tilt));
+  animation: poster-in 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.title {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.tony {
+  font-size: clamp(3.6rem, 16vw, 5.6rem);
+  color: var(--ui-orange);
+  letter-spacing: 0.03em;
+  text-shadow: 4px 4px 0 var(--ui-teal);
+}
+
+.sparane {
+  font-size: clamp(1.7rem, 8.3vw, 2.5rem);
+  color: var(--ui-paper);
+  letter-spacing: 0.04em;
+}
+
+.subtitle {
+  display: inline-block;
+  margin: 12px 0 0;
+  padding: 4px 12px;
+  font-size: 1.02rem;
+  font-weight: 700;
+  font-style: italic;
+  color: var(--ui-ink);
+  background: var(--ui-yellow);
+  transform: rotate(1.5deg);
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--ui-paper);
+  border: var(--ui-border);
+  border-radius: 12px;
+  box-shadow: 6px 6px 0 var(--ui-ink);
+  pointer-events: auto;
+  animation: menu-in 0.4s 0.12s ease-out both;
+}
+
+.menu > :last-child {
+  align-self: center;
+}
+
+.footnote {
+  margin: 0;
+  align-self: flex-start;
+  max-width: 100%;
+  padding: 5px 10px;
+  font-size: 0.78rem;
+  line-height: 1.3;
+  color: var(--ui-paper);
+  background: var(--ui-ink);
+  border-radius: 4px;
+}
+
+@keyframes poster-in {
+  from {
+    opacity: 0;
+    transform: rotate(-6deg) translateY(-18px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(var(--ui-tilt));
+  }
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Schermi piccoli: titolo in alto, pulsanti compatti; la scena resta nel mezzo. */
+@media (max-width: 640px) {
+  .column {
+    width: 100%;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .menu {
+    gap: 8px;
+    padding: 12px;
+  }
+}
+
+@media (max-height: 520px) {
+  .root {
+    padding-block: calc(var(--safe-top) + 6px) calc(var(--safe-bottom) + 6px);
+  }
+  .column {
+    gap: 8px;
+    width: min(100%, 380px);
+  }
+  .poster {
+    padding: 8px 14px 10px;
+  }
+  .tony {
+    font-size: 2.6rem;
+  }
+  .sparane {
+    font-size: 1.3rem;
+  }
+  .subtitle {
+    margin-top: 6px;
+    font-size: 0.9rem;
+  }
+  .menu {
+    gap: 6px;
+    padding: 8px;
+  }
+  .footnote {
+    display: none;
+  }
+}

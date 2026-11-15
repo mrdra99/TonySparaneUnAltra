@@ -1,0 +1,13 @@
+# Deploy su Netlify: collega il repo Git e Netlify legge da qui build e cartella di output.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Il gioco è una singola pagina: ogni percorso sconosciuto torna a index.html.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

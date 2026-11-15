@@ -1,0 +1,226 @@
+.root {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-hud);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: calc(var(--safe-top) + 12px) calc(var(--safe-right) + 14px)
+    calc(var(--safe-bottom) + 14px) calc(var(--safe-left) + 14px);
+  pointer-events: none;
+  font-family: var(--font-body);
+  color: var(--ui-paper);
+}
+
+.top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mission {
+  flex: 0 1 380px;
+  min-width: 0;
+  padding: 8px 14px 10px;
+  background: var(--ui-teal-deep);
+  border: 3px solid var(--ui-ink);
+  border-radius: 6px;
+  box-shadow: var(--ui-shadow);
+  transform: rotate(-1.5deg);
+  transform-origin: left top;
+}
+
+.missionTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  letter-spacing: 0.06em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  color: var(--ui-yellow);
+}
+
+.objective {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 4px 0 0;
+  font-size: 0.92rem;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.counter {
+  flex: none;
+  padding: 0 7px;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  color: var(--ui-ink);
+  background: var(--ui-paper);
+  border-radius: 3px;
+}
+
+.bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.bottomTouch {
+  /* sopra l'area dei pulsanti touch, senza coprirli */
+  padding-bottom: 96px;
+  padding-inline: 96px;
+}
+
+.prompt {
+  margin: 0;
+  padding: 8px 18px;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ui-ink);
+  background: var(--ui-yellow);
+  border: var(--ui-border);
+  border-radius: 999px;
+  box-shadow: var(--ui-shadow);
+  animation: prompt-in 0.15s ease-out both;
+}
+
+.promptDisabled {
+  color: var(--ui-paper);
+  background: var(--ui-ink-soft);
+  border-style: dashed;
+  border-color: var(--ui-paper);
+}
+
+.key {
+  display: inline-block;
+  min-width: 1.7em;
+  padding: 1px 7px;
+  font-family: var(--font-display);
+  font-size: 0.95em;
+  letter-spacing: 0.04em;
+  text-align: center;
+  color: var(--ui-ink);
+  background: var(--ui-paper);
+  border: 2px solid var(--ui-ink);
+  border-bottom-width: 4px;
+  border-radius: 5px;
+}
+
+.hints {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 16px;
+  margin: 0;
+  padding: 6px 14px;
+  list-style: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ui-paper);
+  background: var(--ui-ink);
+  border-radius: 6px;
+}
+
+.hints .key {
+  font-size: 0.8rem;
+}
+
+.tutorial {
+  margin: 0;
+  max-width: min(92vw, 460px);
+  padding: 8px 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--ui-ink);
+  background: var(--ui-paper);
+  border: var(--ui-border);
+  border-radius: 14px;
+  box-shadow: var(--ui-shadow-sm);
+  animation: tutorial-pulse 1.8s ease-in-out infinite;
+}
+
+.rotate {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--safe-bottom) + 150px);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 92vw;
+  min-height: 44px;
+  padding: 8px 14px;
+  font: 700 0.85rem/1.2 var(--font-body);
+  color: var(--ui-ink);
+  background: var(--ui-yellow);
+  border: var(--ui-border);
+  border-radius: 999px;
+  box-shadow: var(--ui-shadow-sm);
+  transform: translateX(-50%);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+@keyframes prompt-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes tutorial-pulse {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+/* HUD compatto su schermi piccoli */
+@media (max-width: 640px), (max-height: 500px) {
+  .root {
+    padding: calc(var(--safe-top) + 6px) calc(var(--safe-right) + 8px)
+      calc(var(--safe-bottom) + 8px) calc(var(--safe-left) + 8px);
+  }
+  .top {
+    gap: 8px;
+  }
+  .mission {
+    flex-basis: 56%;
+    padding: 5px 9px 7px;
+  }
+  .missionTitle {
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+  }
+  .objective {
+    margin-top: 2px;
+    font-size: 0.74rem;
+  }
+  .counter {
+    font-size: 0.78rem;
+  }
+  .prompt {
+    font-size: 1.1rem;
+  }
+  .bottomTouch {
+    padding-bottom: 84px;
+    padding-inline: 80px;
+  }
+  .tutorial {
+    font-size: 0.88rem;
+  }
+}
