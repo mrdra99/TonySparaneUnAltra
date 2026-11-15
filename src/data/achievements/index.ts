@@ -30,4 +30,11 @@ export const ACHIEVEMENTS: readonly Achievement[] = [
     icon: 'Mic',
     points: 120,
   },
+  {
+    id: 'cittadino-del-mondo',
+    title: 'Cittadino del mondo',
+    description: 'Hai raccontato quattro storie impossibili e la piazza non ti ha ancora cacciato.',
+    icon: 'Globe',
+    points: 150,
+  },
 ];

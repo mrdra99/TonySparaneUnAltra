@@ -19,6 +19,7 @@ const chain = () =>
     missionId: 'contratto-discografico',
     text: 'Il disco non uscirà mai. Ma ora è ufficiale: è il disco più atteso dell’universo parallelo.',
     hint: 'Dalla piazza partono voci: Tony ha “storie dal mondo” da raccontare. Quattro punti, quattro leggende.',
+    next: 'tony-world-tour',
   });
 
 const ciro: Dialogue = dialogue(

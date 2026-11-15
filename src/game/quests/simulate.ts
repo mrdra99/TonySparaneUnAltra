@@ -103,3 +103,53 @@ export function playDialogueId(
   if (!d) throw new Error(`Dialogo inesistente: ${dialogueId}`);
   return playDialogue(content, d, progress, pick);
 }
+
+/**
+ * Enumera TUTTI i percorsi possibili di un dialogo (DFS sulle scelte) e restituisce il progresso
+ * finale di ciascuno. Per i test di bilancio (minimo/massimo Cazzatometro di un dialogo).
+ */
+export function enumerateOutcomes(
+  content: GameContent,
+  dialogue: Dialogue,
+  progress: PlayerProgress,
+  limit = 5000,
+): PlayerProgress[] {
+  const results: PlayerProgress[] = [];
+  const rec = (step: DialogueStep, before: PlayerProgress, depth: number): void => {
+    if (results.length >= limit || depth > 60) return;
+    const after = applyEffects(before, step.effects, content).progress;
+    const st = step.state;
+    if (st.status === 'ended') {
+      results.push(
+        st.completed && !after.completedDialogues.includes(dialogue.id)
+          ? { ...after, completedDialogues: [...after.completedDialogues, dialogue.id] }
+          : after,
+      );
+    } else if (st.status === 'choice') {
+      for (const c of st.choices)
+        rec(chooseDialogue(dialogue, st, c.index, after), after, depth + 1);
+    } else if (st.status === 'active' || st.status === 'consequence') {
+      rec(advanceDialogue(dialogue, st, after), after, depth + 1);
+    }
+  };
+  rec(startDialogue(dialogue, progress), progress, 0);
+  return results;
+}
+
+/** Progresso dopo il percorso che MINIMIZZA (o massimizza) il Cazzatometro del dialogo. */
+export function extremeOutcome(
+  content: GameContent,
+  dialogueId: string,
+  progress: PlayerProgress,
+  mode: 'min' | 'max',
+): PlayerProgress {
+  const d = content.dialogues[dialogueId];
+  if (!d) throw new Error(`Dialogo inesistente: ${dialogueId}`);
+  const all = enumerateOutcomes(content, d, progress);
+  const first = all[0];
+  if (!first) throw new Error(`Nessun percorso per ${dialogueId}`);
+  return all.reduce(
+    (a, b) => (mode === 'min' ? (b.cazzate < a.cazzate ? b : a) : b.cazzate > a.cazzate ? b : a),
+    first,
+  );
+}

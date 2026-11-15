@@ -6,6 +6,8 @@ import { M2_DIALOGUES } from './m2';
 import { M3_DIALOGUES } from './m3';
 import { M4_DIALOGUES } from './m4';
 import { M5_DIALOGUES } from './m5';
+import { M6_DIALOGUES } from './m6';
+import { SIDE_DIALOGUES } from './side';
 
 export const DIALOGUES: readonly Dialogue[] = [
   ...M1_DIALOGUES,
@@ -13,4 +15,6 @@ export const DIALOGUES: readonly Dialogue[] = [
   ...M3_DIALOGUES,
   ...M4_DIALOGUES,
   ...M5_DIALOGUES,
+  ...M6_DIALOGUES,
+  ...SIDE_DIALOGUES,
 ];

@@ -44,9 +44,41 @@ const BIKE: InteractableDefinition = {
   disabledLabel: 'PRIMA PARLA CON NICOLA',
 };
 
-export const INTERACTABLES: readonly InteractableDefinition[] = [...SPARANE, STATION_EXIT, BIKE];
+/** Matita collezionabile ("Le matite nel di dietro"). */
+const PENCIL: InteractableDefinition = {
+  id: 'matita',
+  position: PIAZZA_POINTS.pencilCollectible,
+  radius: 2,
+  label: 'RACCOGLI LA MATITA',
+  action: { type: 'dialogue', dialogueId: 'matita' },
+};
+
+export const INTERACTABLES: readonly InteractableDefinition[] = [
+  ...SPARANE,
+  STATION_EXIT,
+  BIKE,
+  PENCIL,
+];
+
+/** Le quattro tappe del World Tour: punto interagibile -> dialogo, attive solo durante la missione 6. */
+const TOUR_STOPS: readonly (readonly [id: string, slug: string, label: string])[] = [
+  ['sparane-0', 'vladivostok', 'RACCONTA: VLADIVOSTOK'],
+  ['sparane-1', 'pupazzo', 'RACCONTA: IL PUPAZZO SEGRETO'],
+  ['sparane-2', 'criceti', 'RACCONTA: LA GABBIA DEI CRICETI'],
+  ['station-exit', 'treno', 'RACCONTA: IL TRENO UNGHERESE'],
+];
+
+const tourOverrides: readonly InteractableOverride[] = TOUR_STOPS.map(([id, slug, label]) => ({
+  id,
+  requires: [
+    { type: 'missionActive', missionId: 'tony-world-tour' },
+    { type: 'objectiveNotCompleted', missionId: 'tony-world-tour', objectiveId: `tour-${slug}` },
+  ],
+  patch: { label, action: { type: 'dialogue', dialogueId: `tour-${slug}` } },
+}));
 
 /** Variazioni degli interagibili in base al progresso (vedi interactableOverrides.ts). */
 export const INTERACTABLE_OVERRIDES: readonly InteractableOverride[] = [
   { id: 'bike', requires: [{ type: 'flag', flag: 'bike.told' }], patch: { enabled: true } },
+  ...tourOverrides,
 ];

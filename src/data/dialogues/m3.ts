@@ -114,10 +114,15 @@ function buildDebtDialogue(): Dialogue {
   const nodes: DialogueNode[] = [];
   nodes.push(
     line('open', TONY, 'Oh Bogdan, fra, che bella giornata, eh?', { gesture: true, next: 'claim' }),
-    line('claim', 'bogdan', 'Tony. Quaranta euro. Ho il quaderno qui. Dove sono i miei soldi?', {
-      mood: 'angry',
-      choices: choicesFor(ROUND1, (s) => `r2_${s}`, 1),
-    }),
+    line(
+      'claim',
+      'bogdan',
+      'Tony. Quaranta euro. L’Intercity da Pisa, te lo ricordi? Ho il quaderno qui. Dove sono i miei soldi?',
+      {
+        mood: 'angry',
+        choices: choicesFor(ROUND1, (s) => `r2_${s}`, 1),
+      },
+    ),
   );
   for (const s1 of STYLES) {
     nodes.push(

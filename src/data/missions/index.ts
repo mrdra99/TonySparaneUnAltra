@@ -88,4 +88,25 @@ export const MISSIONS: readonly Mission[] = [
       storyId: 'story-feat-fantasma',
     },
   },
+  {
+    id: 'tony-world-tour',
+    title: 'TONY WORLD TOUR',
+    tagline: 'Quattro storie impossibili',
+    description:
+      'Tony porta la sua leggenda in giro per la piazza: tre punti SPARANE UN’ALTRA e l’uscita per la stazione.',
+    order: 6,
+    hudLabel: 'Racconta le 4 storie: 3 punti SPARANE UN’ALTRA e l’uscita della stazione',
+    objectives: [
+      { id: 'tour-vladivostok', description: 'Racconta la storia di Vladivostok' },
+      { id: 'tour-pupazzo', description: 'Racconta la storia del pupazzo segreto' },
+      { id: 'tour-criceti', description: 'Racconta la storia della gabbia dei criceti' },
+      { id: 'tour-treno', description: 'Racconta la storia del treno ungherese' },
+    ],
+    reward: {
+      cazzate: 20,
+      points: 250,
+      achievementId: 'cittadino-del-mondo',
+      storyId: 'story-world-tour',
+    },
+  },
 ];
