@@ -41,7 +41,7 @@ test.describe('partita (mobile touch)', () => {
       await page.waitForTimeout(80);
     }
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+    expect(await page.evaluate('window.scrollY')).toBe(0);
     expect(errors).toEqual([]);
   });
 
@@ -50,7 +50,7 @@ test.describe('partita (mobile touch)', () => {
   }) => {
     await page.setViewportSize({ width: 360, height: 740 });
     const overflow = await page.evaluate(
-      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      'document.documentElement.scrollWidth > document.documentElement.clientWidth',
     );
     expect(overflow).toBe(false);
     await expect(page.getByRole('button', { name: 'Pausa' })).toBeVisible();
