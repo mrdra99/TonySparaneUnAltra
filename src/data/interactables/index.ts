@@ -33,7 +33,20 @@ const STATION_EXIT: InteractableDefinition = {
   action: { type: 'dialogue', dialogueId: 'station-gate' },
 };
 
-export const INTERACTABLES: readonly InteractableDefinition[] = [...SPARANE, STATION_EXIT];
+/** La bici di Monica (obiettivo 2 della missione 4): disponibile dopo la leggenda di Tony. */
+const BIKE: InteractableDefinition = {
+  id: 'bike',
+  position: PIAZZA_POINTS.bike,
+  radius: 2.6,
+  label: 'GUARDA LA BICI',
+  action: { type: 'dialogue', dialogueId: 'bike-look' },
+  enabled: false,
+  disabledLabel: 'PRIMA PARLA CON NICOLA',
+};
+
+export const INTERACTABLES: readonly InteractableDefinition[] = [...SPARANE, STATION_EXIT, BIKE];
 
 /** Variazioni degli interagibili in base al progresso (vedi interactableOverrides.ts). */
-export const INTERACTABLE_OVERRIDES: readonly InteractableOverride[] = [];
+export const INTERACTABLE_OVERRIDES: readonly InteractableOverride[] = [
+  { id: 'bike', requires: [{ type: 'flag', flag: 'bike.told' }], patch: { enabled: true } },
+];

@@ -23,4 +23,11 @@ export const ACHIEVEMENTS: readonly Achievement[] = [
     icon: 'Coins',
     points: 120,
   },
+  {
+    id: 'featuring-fantasma',
+    title: 'Featuring fantasma',
+    description: 'Hai spiegato un disco mai uscito a un artista che non esiste.',
+    icon: 'Mic',
+    points: 120,
+  },
 ];

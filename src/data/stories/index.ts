@@ -48,4 +48,20 @@ export const STORIES: readonly Story[] = [
     icon: 'Coins',
     points: 40,
   },
+  {
+    id: 'story-bici-monica',
+    title: 'La bici di Monica',
+    description:
+      'Collezionisti fantasma, tour in Albania e musei inesistenti. Leggenda inventata da Tony: la bici sta benissimo.',
+    icon: 'Bike',
+    points: 60,
+  },
+  {
+    id: 'story-feat-fantasma',
+    title: 'Il feat fantasma',
+    description:
+      'Il disco che non esce mai e l’artista inventato che compare solo con la nebbia. Vanteria di Tony, ovviamente.',
+    icon: 'Mic',
+    points: 60,
+  },
 ];

@@ -55,4 +55,37 @@ export const MISSIONS: readonly Mission[] = [
       storyId: 'story-debito-leggendario',
     },
   },
+  {
+    id: 'mistero-bici',
+    title: 'IL MISTERO DELLA BICI',
+    tagline: 'Che storia è quella della bici di Monica?',
+    description:
+      'Nicola vuole la verità sulla bici di Monica. Tony ha tre versioni. Tutte inventate, tutte meravigliose.',
+    order: 4,
+    hudLabel: 'Racconta la leggenda della bici a Nicola, poi guarda la bici',
+    objectives: [
+      { id: 'tell-bike', description: 'Racconta la leggenda a Nicola, vicino alla bici' },
+      { id: 'check-bike', description: 'Guarda la bici di Monica' },
+    ],
+    reward: { cazzate: 10, points: 100, storyId: 'story-bici-monica' },
+  },
+  {
+    id: 'contratto-discografico',
+    title: 'IL CONTRATTO DISCOGRAFICO',
+    tagline: 'Il feat fantasma',
+    description:
+      'Il disco di Tony non esce mai. Perché? Lui ha tre spiegazioni. L’artista inventato ne ha una sola: la nebbia.',
+    order: 5,
+    hudLabel: 'Spiega a Ciro perché il disco non esce, poi trova MC Nebbia',
+    objectives: [
+      { id: 'ask-disk', description: 'Spiega a Ciro perché il disco non è uscito' },
+      { id: 'meet-nebbia', description: 'Cerca MC Nebbia, l’artista inventato' },
+    ],
+    reward: {
+      cazzate: 15,
+      points: 150,
+      achievementId: 'featuring-fantasma',
+      storyId: 'story-feat-fantasma',
+    },
+  },
 ];

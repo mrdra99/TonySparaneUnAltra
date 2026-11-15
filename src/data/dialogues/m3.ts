@@ -156,6 +156,7 @@ function buildDebtDialogue(): Dialogue {
       missionId: 'debito-leggendario',
       text: 'Bogdan chiude il quaderno. Sulla copertina c’è scritto “Tony: vedi appendice”.',
       hint: 'Dalle parti della bici qualcuno ripete a mezza voce: “Ma che storia è quella di Monica?”',
+      next: 'mistero-bici',
     }),
     // riapertura: la battuta dipende dall'esito
     line('again', 'bogdan', BOGDAN_AGAIN.win, {

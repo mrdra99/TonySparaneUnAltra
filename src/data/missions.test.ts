@@ -1,4 +1,9 @@
 import { content } from '@/data';
+import { INTERACTABLE_OVERRIDES } from '@/data/interactables';
+import { GAME_FLAGS } from '@/game/core/constants';
+import type { InteractableDefinition } from '@/game/core/types';
+import { applyEffects } from '@/game/progression/effects';
+import { resolveInteractable } from '@/game/systems/interactableOverrides';
 import {
   newGameProgress,
   pickFirst,
@@ -146,5 +151,82 @@ describe('missione 3 - Il debito leggendario', () => {
     expect(again.completed).toBe(true);
     expect(again.progress.cazzate).toBe(first.progress.cazzate);
     expect(again.lines).toHaveLength(1);
+  });
+});
+
+describe('missione 4 - Il mistero della bici', () => {
+  it.each([0, 1, 2])(
+    'versione %i: racconta, la bici sbanda, guarda la bici, missione completa',
+    (v) => {
+      let p = newGameProgress(content);
+      // la missione parte dalla catena; in test la avviamo direttamente
+      p = applyEffects(p, [{ type: 'startMission', missionId: 'mistero-bici' }], content).progress;
+      const bikeBefore = resolveInteractable(
+        content.interactables.find((i) => i.id === 'bike') as InteractableDefinition,
+        p,
+        INTERACTABLE_OVERRIDES,
+      );
+      expect(bikeBefore.def.enabled).toBe(false);
+      p = playDialogueId(content, 'nicola-bici', p, pickSource(v)).progress;
+      expect(p.flags).toContain(GAME_FLAGS.bikeGag);
+      expect(p.flags).toContain(`bike.v${v + 1}`);
+      const bikeAfter = resolveInteractable(bikeBefore.def, p, INTERACTABLE_OVERRIDES);
+      expect(bikeAfter.def.enabled).toBe(true);
+      const r = playDialogueId(content, 'bike-look', p);
+      expect(r.progress.missions['mistero-bici']?.status).toBe('completed');
+      expect(r.progress.unlockedStories).toContain('story-bici-monica');
+      expect(r.progress.missions['contratto-discografico']?.status).toBe('active');
+    },
+  );
+
+  it('la leggenda e dichiarata inventata e Monica reagisce alla versione scelta', () => {
+    const p = applyEffects(
+      newGameProgress(content),
+      [{ type: 'startMission', missionId: 'mistero-bici' }],
+      content,
+    ).progress;
+    const told = playDialogueId(content, 'nicola-bici', p, pickSource(1));
+    expect(told.lines.join(' ')).toMatch(/inventata/i);
+    const monica = playDialogueId(content, 'monica-bici', told.progress);
+    expect(monica.lines.join(' ')).toMatch(/Albania/);
+    const generic = playDialogueId(content, 'monica-bici', p);
+    expect(generic.lines.join(' ')).not.toMatch(/Albania/);
+  });
+});
+
+describe('missione 5 - Il contratto discografico', () => {
+  const start = () =>
+    applyEffects(
+      newGameProgress(content),
+      [{ type: 'startMission', missionId: 'contratto-discografico' }],
+      content,
+    ).progress;
+
+  it.each([
+    ['ciro, poi nebbia', ['ciro-disco', 'nebbia-incontro']],
+    ['nebbia, poi ciro', ['nebbia-incontro', 'ciro-disco']],
+  ])('e completabile (%s) con ogni scelta', (_n, order) => {
+    for (const pick of [0, 1, 2]) {
+      let p = start();
+      for (const id of order) p = playDialogueId(content, id, p, pickSource(pick)).progress;
+      expect(p.missions['contratto-discografico']?.status).toBe('completed');
+      expect(p.unlockedAchievements).toContain('featuring-fantasma');
+    }
+  });
+
+  it('usa le battute del prompt e confina il nome reale a una vanteria non creduta', () => {
+    const r = playDialogueId(content, 'ciro-disco', start());
+    expect(r.lines).toContain('Tony, ma il disco quando esce?');
+    expect(r.lines).toContain('Fra, era tutto pronto.');
+    expect(r.lines).toContain('E allora perché non è uscito?');
+    // il nome compare in UNA sola battuta, detta da Tony, seguita da una battuta incredula
+    const hits: string[] = [];
+    for (const d of Object.values(content.dialogues)) {
+      for (const n of Object.values(d.nodes)) {
+        if (/tedua/i.test(n.text)) hits.push(`${d.id}/${n.id}/${n.speaker}`);
+      }
+    }
+    expect(hits).toEqual(['ciro-disco/boast/tony']);
+    expect(content.dialogues['ciro-disco']?.nodes['doubt']?.speaker).toBe('ciro');
   });
 });
