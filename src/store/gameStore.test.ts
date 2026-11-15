@@ -273,6 +273,78 @@ describe('finale a 100', () => {
   });
 });
 
+describe('refresh, CONTINUA e ricomincio (integrazione con lo storage)', () => {
+  it('dopo un refresh CONTINUA ripristina Cazzatometro, missioni e flag', () => {
+    const storage = memoryStorage();
+    const a = setup(storage);
+    play(a.store);
+    a.store.getState().applyEffects([
+      { type: 'addCazzate', amount: 40, reason: 'x' },
+      { type: 'setFlag', flag: 'test-flag' },
+    ]);
+    const before = a.store.getState().progress;
+
+    const b = setup(storage); // refresh: nuovo store, stesso localStorage
+    b.store.getState().markSceneReady();
+    expect(b.store.getState().phase).toBe('menu');
+    expect(b.store.getState().hasSave).toBe(true);
+    b.store.getState().continueGame();
+    const s = b.store.getState();
+    expect(s.phase).toBe('intro');
+    expect(s.progress.cazzate).toBe(40);
+    expect(s.progress.flags).toContain('test-flag');
+    expect(s.progress.missions).toEqual(before.missions);
+  });
+  it('dopo il finale e un refresh CONTINUA riprende a giocare senza rilanciare il finale', () => {
+    const storage = memoryStorage();
+    const a = setup(storage);
+    play(a.store);
+    a.store.getState().applyEffects(KO_EFFECTS);
+    expect(a.store.getState().phase).toBe('ending');
+
+    const b = setup(storage);
+    b.store.getState().markSceneReady();
+    b.store.getState().continueGame();
+    const s = b.store.getState();
+    expect(s.phase).toBe('playing');
+    expect(s.celebration).toBeNull();
+    expect(s.endingRevealed).toBe(false);
+    expect(s.progress.cazzate).toBe(100);
+  });
+  it('Torna al menu dopo il finale lascia uno stato pulito e CONTINUA resta disponibile', () => {
+    const { store } = setup();
+    play(store);
+    store.getState().applyEffects(KO_EFFECTS);
+    store.getState().returnToMenu();
+    const s = store.getState();
+    expect(s.phase).toBe('menu');
+    expect(s.celebration).toBeNull();
+    expect(s.endingRevealed).toBe(false);
+    expect(s.dialogue.state.status).toBe('idle');
+    expect(s.hasSave).toBe(true);
+  });
+  it('Ricomincia dopo il finale azzera anche il salvataggio su storage', () => {
+    const storage = memoryStorage();
+    const { store } = setup(storage);
+    play(store);
+    store.getState().applyEffects(KO_EFFECTS);
+    store.getState().restart();
+    const r = loadGame(storage);
+    expect(r.status === 'loaded' && r.save.progress.cazzate).toBe(0);
+    expect(r.status === 'loaded' && r.save.progress.stats.finishedAt).toBeNull();
+  });
+  it('il dialogo blocca il gioco: phase dialogue, interazioni ignorate, Esc chiude', () => {
+    const { store } = setup();
+    play(store);
+    store.getState().startDialogue('luca-talk');
+    expect(store.getState().phase).toBe('dialogue');
+    store.getState().pause();
+    expect(store.getState().phase).toBe('dialogue'); // la pausa non scavalca il dialogo
+    store.getState().closeDialogue();
+    expect(store.getState().phase).toBe('playing');
+  });
+});
+
 describe('collectible e missione come azioni', () => {
   it('collectible: una sola volta, applica gli effetti e si disabilita', () => {
     const { store, interactions } = setup();
