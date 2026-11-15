@@ -17,6 +17,7 @@ import { damp } from '@/game/movement/movementMath';
 import { reachTutorial } from '@/game/systems/tutorial';
 import { gameStore, runtime, type GamePhase } from '@/store/gameStore';
 import type { CameraMode } from '@/store/runtime';
+import { collidersFor } from '@/levels/intercity/logic/colliders';
 import { PIAZZA_COLLIDERS } from '@/world/environments/piazzaColliders';
 import { createShotOut, dialogueShot, followBackVector, menuOrbitAngle } from './cameraShots';
 
@@ -36,10 +37,20 @@ export function cameraModeForPhase(phase: GamePhase): CameraMode {
   }
 }
 
-/** Solo le masse grandi (muri, gradinata, cassonetto): lampioni, alberi e panchine non fanno "zoomare". */
-const OCCLUDERS: readonly ColliderShape[] = PIAZZA_COLLIDERS.filter(
-  (c) => c.kind === 'box' && Math.min(c.maxX - c.minX, c.maxZ - c.minZ) >= 0.9,
-);
+/** Solo le masse grandi (muri, gradinata, treno, taxi): lampioni, alberi e panchine non fanno "zoomare". */
+const bigBoxes = (shapes: readonly ColliderShape[]): readonly ColliderShape[] =>
+  shapes.filter((c) => c.kind === 'box' && Math.min(c.maxX - c.minX, c.maxZ - c.minZ) >= 0.9);
+
+const PIAZZA_OCCLUDERS = bigBoxes(PIAZZA_COLLIDERS);
+const PISA_OCCLUDERS = bigBoxes(collidersFor('intercity-pisa'));
+const VIAREGGIO_OCCLUDERS = bigBoxes(collidersFor('intercity-viareggio'));
+
+/** Occluder della camera per il livello corrente (nessuna allocazione per frame). */
+function occludersFor(level: string): readonly ColliderShape[] {
+  if (level === 'intercity-pisa') return PISA_OCCLUDERS;
+  if (level === 'intercity-viareggio') return VIAREGGIO_OCCLUDERS;
+  return PIAZZA_OCCLUDERS;
+}
 
 /** Altezza del punto guardato sopra i piedi di Tony (World: testa ~1.63, spalle ~1.4). */
 const FOLLOW_TARGET_Y = 1.5;
@@ -73,6 +84,7 @@ export function ThirdPersonCamera() {
     const p = runtime.player;
     const cam = runtime.camera;
     const settings = gs.settings;
+    const occluders = occludersFor(gs.level);
     const reduced = settings.reducedMotion;
     const t = state.clock.elapsedTime;
 
@@ -114,7 +126,7 @@ export function ThirdPersonCamera() {
       const dMinus = (scratch.alt.camX - cx) ** 2 + (scratch.alt.camZ - cz) ** 2;
       let preferred: 1 | -1 = dPlus <= dMinus ? 1 : -1;
       const blocked = (s: typeof scratch.shot): number =>
-        raycast2D(s.lookX, s.lookZ, s.camX, s.camZ, OCCLUDERS, 0.3);
+        raycast2D(s.lookX, s.lookZ, s.camX, s.camZ, occluders, 0.3);
       const hitPref = blocked(preferred === 1 ? scratch.shot : scratch.alt);
       if (hitPref < 0.85) {
         const hitOther = blocked(preferred === 1 ? scratch.alt : scratch.shot);
@@ -157,7 +169,7 @@ export function ThirdPersonCamera() {
         p.z,
         p.x + back.x * wanted,
         p.z + back.z * wanted,
-        OCCLUDERS,
+        occluders,
         0.35,
       );
       const eff = hit >= 1 ? wanted : Math.max(MIN_DISTANCE, wanted * hit);
