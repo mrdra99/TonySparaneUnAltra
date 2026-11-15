@@ -1,0 +1,26 @@
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.confirm {
+  padding: 4px 0;
+}
+
+.confirmText {
+  margin: 0 0 14px;
+  font-size: 1.05rem;
+}
+
+@media (max-height: 520px) {
+  .stack {
+    gap: 8px;
+  }
+}
