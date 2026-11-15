@@ -21,6 +21,7 @@ const chain = () =>
     text: 'Sul registro dei debiti comici di Tony ora c’è scritto: Marco, Luca, Giulia. E una cosa che nessuno ha capito.',
     hint: 'Intanto, verso l’uscita della piazza, uno aspetta Tony con la faccia di chi ha un treno da pagare.',
     extra: [unlockStory('story-registro-debiti')],
+    next: 'biglietto-treno',
   });
 
 const marco: Dialogue = dialogue(
