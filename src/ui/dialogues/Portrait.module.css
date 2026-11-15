@@ -1,0 +1,44 @@
+.frame {
+  position: relative;
+  flex: none;
+  width: 104px;
+  height: 104px;
+  overflow: hidden;
+  background: var(--ui-paper-dim);
+  border: var(--ui-border);
+  border-radius: 8px;
+  box-shadow: var(--ui-shadow-sm);
+  transform: rotate(-2deg);
+}
+
+.photo,
+.avatar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 25%;
+}
+
+.initials {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  padding: 0 6px;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  color: var(--ui-paper);
+  background: var(--ui-ink);
+  border-radius: 4px;
+}
+
+@media (max-width: 640px), (max-height: 500px) {
+  .frame {
+    width: 64px;
+    height: 64px;
+  }
+  .initials {
+    font-size: 0.7rem;
+  }
+}
