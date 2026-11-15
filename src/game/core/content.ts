@@ -14,6 +14,7 @@ import type {
   Mission,
   NpcDefinition,
   RandomStory,
+  SpeakerDefinition,
   Story,
 } from './types';
 
@@ -25,6 +26,7 @@ export interface ContentInput {
   npcs: readonly NpcDefinition[];
   interactables: readonly InteractableDefinition[];
   randomStories: readonly RandomStory[];
+  speakers?: readonly SpeakerDefinition[];
 }
 
 function indexById<T extends { id: string }>(
@@ -43,6 +45,7 @@ export function createContent(input: ContentInput): GameContent {
   indexById(input.npcs, 'npc');
   indexById(input.interactables, 'interactable');
   indexById(input.randomStories, 'randomStory');
+  indexById(input.speakers ?? [], 'speaker');
   return {
     missions: indexById(input.missions, 'mission'),
     missionOrder: [...input.missions].sort((a, b) => a.order - b.order).map((m) => m.id),
@@ -54,6 +57,7 @@ export function createContent(input: ContentInput): GameContent {
     npcs: input.npcs,
     interactables: input.interactables,
     randomStories: input.randomStories,
+    speakers: input.speakers ?? [],
   };
 }
 

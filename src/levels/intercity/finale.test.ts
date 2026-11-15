@@ -1,5 +1,8 @@
 // Completabilita' del livello simulando le scelte col motore dialoghi reale e i dati reali.
 import { content } from '@/data';
+import { resolveSpeaker } from '@/game/dialogue/speakers';
+import { SPEAKER_NARRATOR, SPEAKER_TONY } from '@/game/core/types';
+import { FINALE_DIALOGUES } from './data';
 import { validateContent } from '@/game/core/content';
 import type { PlayerProgress } from '@/game/core/types';
 import { evaluateConditions } from '@/game/dialogue/engine';
@@ -177,5 +180,24 @@ describe('completabilita del livello (motore dialoghi puro)', () => {
       true,
     );
     expect(evaluateConditions(taxi?.unlockedWhen, base)).toBe(false);
+  });
+});
+
+describe('speaker del finale', () => {
+  it('ogni speaker dei dialoghi del finale ha nome e aspetto (niente fallback)', () => {
+    for (const d of FINALE_DIALOGUES) {
+      for (const node of Object.values(d.nodes)) {
+        if (node.speaker === SPEAKER_TONY || node.speaker === SPEAKER_NARRATOR) continue;
+        const info = resolveSpeaker(node.speaker, content);
+        expect(info.appearance, `${d.id}/${node.id} speaker '${node.speaker}'`).toBeDefined();
+        expect(info.name.length).toBeGreaterThan(0);
+        expect(info.name).not.toBe(node.speaker.toLowerCase());
+      }
+    }
+  });
+
+  it('Nico, Vale, Ricky e il Tassista si chiamano correttamente', () => {
+    expect(resolveSpeaker('Nico', content).name).toBe('Nico');
+    expect(resolveSpeaker('Tassista', content).appearance?.height).toBeGreaterThan(1.5);
   });
 });

@@ -337,6 +337,15 @@ export interface GameSave {
 // Contenuti (catalogo indicizzato prodotto da createContent)
 // ---------------------------------------------------------------------------
 
+/** Chi parla in un dialogo senza essere un NPC della piazza (nome e aspetto nel pannello). */
+export interface SpeakerDefinition {
+  /** Valore usato in `DialogueNode.speaker`. */
+  id: string;
+  name: string;
+  portrait?: string;
+  appearance?: NpcAppearance;
+}
+
 export interface GameContent {
   missions: Readonly<Record<string, Mission>>;
   /** Id missioni ordinati per `order`. */
@@ -351,4 +360,6 @@ export interface GameContent {
   /** Interagibili NON-NPC (gli NPC generano il proprio da `npcs`). */
   interactables: readonly InteractableDefinition[];
   randomStories: readonly RandomStory[];
+  /** Speaker extra (non NPC della piazza), es. i personaggi del livello finale. */
+  speakers?: readonly SpeakerDefinition[];
 }

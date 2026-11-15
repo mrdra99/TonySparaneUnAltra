@@ -7,6 +7,7 @@ import {
   FINALE_ACHIEVEMENTS,
   FINALE_DIALOGUES,
   FINALE_MISSIONS,
+  FINALE_SPEAKERS,
   FINALE_STORIES,
 } from '@/levels/intercity/data';
 import { ACHIEVEMENTS } from './achievements';
@@ -25,6 +26,7 @@ export const content = createContent({
   npcs: NPCS,
   interactables: INTERACTABLES,
   randomStories: RANDOM_STORIES,
+  speakers: FINALE_SPEAKERS,
 });
 
 export { ASSET_PATHS, MISSING_REFERENCE_ASSETS } from './assets';

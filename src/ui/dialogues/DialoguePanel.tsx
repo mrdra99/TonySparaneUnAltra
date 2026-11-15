@@ -121,7 +121,6 @@ export function DialoguePanel() {
   if (!open || !line) return null;
 
   const speaker = resolveSpeaker(line.speaker, content);
-  const npc = content.npcs.find((n) => n.id === line.speaker);
   const narrator = !speaker.name;
   const visible = reduced ? text : text.slice(0, count);
 
@@ -137,7 +136,7 @@ export function DialoguePanel() {
         onClick={onPanelClick}
       >
         {!narrator && (
-          <Portrait name={speaker.name} src={speaker.portrait} appearance={npc?.appearance} />
+          <Portrait name={speaker.name} src={speaker.portrait} appearance={speaker.appearance} />
         )}
         <div className={styles.main}>
           {!narrator && <p className={styles.name}>{speaker.name}</p>}
