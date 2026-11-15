@@ -1,0 +1,123 @@
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-menu);
+  display: grid;
+  place-items: center;
+  padding: calc(var(--safe-top) + 12px) calc(var(--safe-right) + 12px)
+    calc(var(--safe-bottom) + 12px) calc(var(--safe-left) + 12px);
+  pointer-events: auto;
+}
+
+.scrim {
+  background: rgb(22 33 62 / 0.72);
+}
+
+.sheet {
+  --ui-focus: var(--ui-teal-deep);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 100%;
+  min-height: 0;
+  color: var(--ui-ink);
+  background: var(--ui-paper);
+  border: var(--ui-border);
+  border-radius: 14px;
+  box-shadow: 6px 6px 0 var(--ui-ink);
+  font-family: var(--font-body);
+  outline: none;
+  animation: sheet-in 0.18s ease-out both;
+}
+
+.narrow {
+  max-width: 420px;
+}
+.normal {
+  max-width: 640px;
+}
+.wide {
+  max-width: 920px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px 12px 18px;
+  background: var(--ui-ink);
+  border-radius: 9px 9px 0 0;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.35rem, 5vw, 1.9rem);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ui-yellow);
+  transform: rotate(var(--ui-tilt));
+  transform-origin: left center;
+}
+
+.close {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  color: var(--ui-ink);
+  background: var(--ui-orange);
+  border: 3px solid var(--ui-paper);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.close:hover {
+  background: var(--ui-yellow);
+}
+
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 16px 18px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  line-height: 1.45;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+  padding: 12px 18px 16px;
+  border-top: 3px dashed var(--ui-ink);
+}
+
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-height: 460px) {
+  .header {
+    padding-block: 6px;
+  }
+  .body {
+    padding-block: 10px;
+  }
+  .footer {
+    padding-block: 8px 10px;
+  }
+}
