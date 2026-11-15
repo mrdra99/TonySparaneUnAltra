@@ -16,15 +16,24 @@ const SPARANE_FALLBACK: readonly Vec2[] = [
 export const sparanePoint = (i: number): Vec2 =>
   PIAZZA_POINTS.sparane[i] ?? SPARANE_FALLBACK[i] ?? PIAZZA_POINTS.npcArea;
 
-export const INTERACTABLES: readonly InteractableDefinition[] = [0, 1, 2].map(
-  (i): InteractableDefinition => ({
-    id: `sparane-${i}`,
-    position: sparanePoint(i),
-    radius: 2.2,
-    label: RANDOM_STORY_LABEL,
-    action: { type: 'randomStory' },
-  }),
-);
+const SPARANE: readonly InteractableDefinition[] = [0, 1, 2].map((i): InteractableDefinition => ({
+  id: `sparane-${i}`,
+  position: sparanePoint(i),
+  radius: 2.2,
+  label: RANDOM_STORY_LABEL,
+  action: { type: 'randomStory' },
+}));
+
+/** Uscita verso la stazione: gag di Tony (e quarta storia del World Tour, vedi override). */
+const STATION_EXIT: InteractableDefinition = {
+  id: 'station-exit',
+  position: PIAZZA_POINTS.stationExit,
+  radius: 2.4,
+  label: 'VERSO LA STAZIONE',
+  action: { type: 'dialogue', dialogueId: 'station-gate' },
+};
+
+export const INTERACTABLES: readonly InteractableDefinition[] = [...SPARANE, STATION_EXIT];
 
 /** Variazioni degli interagibili in base al progresso (vedi interactableOverrides.ts). */
 export const INTERACTABLE_OVERRIDES: readonly InteractableOverride[] = [];

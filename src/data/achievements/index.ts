@@ -9,4 +9,18 @@ export const ACHIEVEMENTS: readonly Achievement[] = [
     icon: 'Moon',
     points: 100,
   },
+  {
+    id: 'pendolare-internazionale',
+    title: 'Pendolare internazionale',
+    description: 'Hai chiesto un biglietto per Viareggio, la Russia o una missione riservata.',
+    icon: 'TrainFront',
+    points: 100,
+  },
+  {
+    id: 'finanza-creativa',
+    title: 'Finanza creativa',
+    description: 'Hai sostenuto tre scuse consecutive davanti a un quaderno dei debiti.',
+    icon: 'Coins',
+    points: 120,
+  },
 ];
