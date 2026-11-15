@@ -6,6 +6,7 @@ import { Home, RotateCcw } from 'lucide-react';
 import { content } from '@/data';
 import { useDeviceProfile } from '@/hooks/useDeviceProfile';
 import type { PlayerProgress } from '@/game/core/types';
+import { FINALE_KO_FLAG } from '@/game/progression/cazzatometro';
 import { useGameStore } from '@/store/gameStore';
 import { Button } from '../shared/Button';
 import { useReducedMotion } from '../shared/useReducedMotion';
@@ -156,6 +157,11 @@ export function EndingScreen() {
         <section className={styles.card} role="dialog" aria-modal="true" aria-label="Fine demo">
           <h1 className={styles.title}>TONY NE HA SPARATA UN&apos;ALTRA!</h1>
           <p className={styles.sub}>Il Cazzatometro ha toccato quota 100.</p>
+          {progress.flags.includes(FINALE_KO_FLAG) && (
+            <p className={styles.debt}>
+              Debito totale con Bogdan: 40 € + taxi + una ninna kanna mai ricevuta.
+            </p>
+          )}
           <p className={styles.scoreLabel}>PUNTEGGIO</p>
           <p className={styles.score}>{progress.score}</p>
           <dl className={styles.stats}>

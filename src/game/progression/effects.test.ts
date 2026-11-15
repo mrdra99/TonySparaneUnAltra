@@ -1,5 +1,11 @@
 import { makeTestContent } from '@/tests/fixtures';
-import { THRESHOLD_MESSAGES, clampCazzate, thresholdsCrossed } from './cazzatometro';
+import {
+  FINALE_KO_FLAG,
+  PRE_FINALE_CAP,
+  THRESHOLD_MESSAGES,
+  clampCazzate,
+  thresholdsCrossed,
+} from './cazzatometro';
 import { applyEffect, applyEffects } from './effects';
 import { createInitialProgress } from './progress';
 
@@ -40,8 +46,27 @@ describe('applyEffect addCazzate', () => {
       { type: 'thresholdReached', threshold: 50, message: 'La piazza inizia a dubitare.' },
     ]);
   });
-  it('a 100 emette soglia e celebrazione finale; il valore e clampato', () => {
+  it('prima del K.O. tecnico il valore e fermo al tetto pre-finale (95) e non emette il finale', () => {
     const p = { ...fresh(), cazzate: 90 };
+    const r = applyEffect(p, { type: 'addCazzate', amount: 30, reason: 'x' }, content);
+    expect(r.progress.cazzate).toBe(PRE_FINALE_CAP);
+    expect(r.events.some((e) => e.type === 'thresholdReached' && e.threshold === 100)).toBe(false);
+    expect(r.events.some((e) => e.type === 'celebration')).toBe(false);
+    // al tetto: nessun altro guadagno
+    const again = applyEffect(r.progress, { type: 'addCazzate', amount: 5, reason: 'x' }, content);
+    expect(again.progress.cazzate).toBe(PRE_FINALE_CAP);
+    expect(again.events).toEqual([]);
+  });
+  it('il tetto non abbassa mai un valore gia sopra (vecchi salvataggi) e non limita i malus', () => {
+    const old = { ...fresh(), cazzate: 100 };
+    expect(applyEffect(old, { type: 'addCazzate', amount: 3, reason: 'x' }, content).progress).toBe(
+      old,
+    );
+    const down = applyEffect(old, { type: 'addCazzate', amount: -10, reason: 'x' }, content);
+    expect(down.progress.cazzate).toBe(90);
+  });
+  it('con il flag del K.O. tecnico si arriva a 100: soglia e celebrazione finale; il valore e clampato', () => {
+    const p = { ...fresh(), cazzate: 90, flags: [FINALE_KO_FLAG] };
     const r = applyEffect(p, { type: 'addCazzate', amount: 30, reason: 'x' }, content);
     expect(r.progress.cazzate).toBe(100);
     expect(r.events).toContainEqual({
@@ -162,8 +187,15 @@ describe('missioni e obiettivi', () => {
     );
     expect(again.progress).toBe(done.progress);
   });
-  it('il premio puo far scattare le soglie (e il finale)', () => {
-    const p = { ...fresh(), cazzate: 50 };
+  it('il premio puo far scattare le soglie; il finale solo dopo il K.O. tecnico', () => {
+    const capped = applyEffect(
+      { ...fresh(), cazzate: 50 },
+      { type: 'completeObjective', missionId: 'm2', objectiveId: 'o1' },
+      content,
+    );
+    expect(capped.progress.cazzate).toBe(PRE_FINALE_CAP);
+    expect(capped.events).not.toContainEqual({ type: 'celebration', kind: 'finale' });
+    const p = { ...fresh(), cazzate: 50, flags: [FINALE_KO_FLAG] };
     const r = applyEffect(
       p,
       { type: 'completeObjective', missionId: 'm2', objectiveId: 'o1' },

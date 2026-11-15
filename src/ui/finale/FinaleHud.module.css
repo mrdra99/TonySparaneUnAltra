@@ -1,0 +1,182 @@
+/* OWNER: Finale. HUD del flashback: stesso linguaggio dell'HUD esistente (bordi spessi, ombre piatte). */
+.root {
+  position: absolute;
+  inset: calc(var(--safe-top) + 92px) calc(var(--safe-right) + 14px) auto
+    calc(var(--safe-left) + 14px);
+  z-index: var(--z-hud);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: none;
+  font-family: var(--font-body);
+  color: var(--ui-paper);
+}
+
+.card {
+  width: min(100%, 300px);
+  padding: 7px 12px 9px;
+  background: var(--ui-ink);
+  border: 3px solid var(--ui-paper);
+  border-radius: 6px;
+  box-shadow: var(--ui-shadow-sm);
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 5px;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  line-height: 1.05;
+  color: var(--ui-yellow);
+}
+
+.value {
+  margin-left: auto;
+  font-family: var(--font-display);
+  color: var(--ui-paper);
+}
+
+/* --- pazienza --- */
+.patience {
+  transform: rotate(-1deg);
+}
+
+.track {
+  height: 16px;
+  overflow: hidden;
+  background: var(--ui-ink-soft);
+  border: 2px solid var(--ui-paper);
+  border-radius: 4px;
+}
+
+.fill {
+  height: 100%;
+  background: repeating-linear-gradient(-45deg, var(--ui-teal) 0 10px, var(--ui-yellow) 10px 20px);
+  transition: width 0.7s cubic-bezier(0.2, 1, 0.3, 1);
+}
+
+.low {
+  border-color: var(--ui-red);
+  animation: shake 0.5s ease-in-out infinite;
+}
+
+.low .fill {
+  background: repeating-linear-gradient(-45deg, var(--ui-red) 0 10px, var(--ui-orange) 10px 20px);
+}
+
+/* --- countdown --- */
+.countdown {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ui-yellow);
+  transform: rotate(1deg);
+}
+
+.countdown .label {
+  margin: 0;
+}
+
+.time {
+  margin: 2px 0 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  color: var(--ui-paper);
+  font-variant-numeric: tabular-nums;
+}
+
+.delay {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--ui-orange);
+}
+
+/* --- colletta --- */
+.colletta .label {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.rows {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 3px 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ui-ink);
+  background: var(--ui-paper);
+  border-radius: 4px;
+}
+
+.row.pending {
+  color: var(--ui-paper);
+  background: var(--ui-ink-soft);
+  border: 1px dashed var(--ui-paper);
+}
+
+.row.tony {
+  color: var(--ui-paper);
+  background: var(--ui-red);
+}
+
+.amount {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: rotate(-1deg) translateX(0);
+  }
+  25% {
+    transform: rotate(-1deg) translateX(-2px);
+  }
+  75% {
+    transform: rotate(-1deg) translateX(2px);
+  }
+}
+
+@media (max-width: 640px), (max-height: 500px) {
+  .root {
+    inset: calc(var(--safe-top) + 70px) calc(var(--safe-right) + 8px) auto
+      calc(var(--safe-left) + 8px);
+    gap: 5px;
+  }
+  .card {
+    width: min(100%, 240px);
+    padding: 4px 8px 6px;
+  }
+  .label {
+    font-size: 0.78rem;
+    margin-bottom: 3px;
+  }
+  .track {
+    height: 12px;
+  }
+  .time {
+    font-size: 1.15rem;
+  }
+  .row {
+    padding: 2px 6px;
+    font-size: 0.7rem;
+  }
+}

@@ -7,6 +7,9 @@ const ALL: readonly SfxName[] = [
   'achievement',
   'cazzateUp',
   'finale',
+  'ringBell',
+  'stationChime',
+  'taxiHorn',
   'blip',
 ];
 

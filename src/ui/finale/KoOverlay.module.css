@@ -1,0 +1,164 @@
+/* OWNER: Finale. Overlay del K.O. tecnico: poster di boxe, campanella, conteggio dell'arbitro. */
+.root {
+  position: absolute;
+  inset: 0;
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  font-family: var(--font-display);
+  text-align: center;
+  text-transform: uppercase;
+  overflow: hidden;
+}
+
+/* vignettatura da slow-motion */
+.root[data-stage='collapse']::before,
+.root[data-stage='count1']::before,
+.root[data-stage='count2']::before,
+.root[data-stage='count3']::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(5, 7, 15, 0.65) 100%);
+}
+
+.barTop,
+.barBottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  background: #000;
+  transition: height 0.7s ease-out;
+}
+
+.barTop {
+  top: 0;
+}
+
+.barBottom {
+  bottom: 0;
+}
+
+.barTop[data-on='true'],
+.barBottom[data-on='true'] {
+  height: 11vh;
+}
+
+.bell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 10px 22px;
+  font-size: clamp(1.9rem, 8vw, 3.6rem);
+  letter-spacing: 0.06em;
+  color: var(--ui-ink);
+  background: var(--ui-yellow);
+  border: var(--ui-border);
+  border-radius: 12px;
+  box-shadow: 6px 6px 0 var(--ui-ink);
+  animation: ring 0.28s ease-in-out infinite alternate;
+}
+
+.slow {
+  position: absolute;
+  bottom: calc(11vh + 18px);
+  margin: 0;
+  padding: 4px 16px;
+  font-size: 1.15rem;
+  letter-spacing: 0.1em;
+  color: var(--ui-paper);
+  background: rgba(22, 33, 62, 0.85);
+  border-radius: 4px;
+}
+
+.count {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ref {
+  margin: 0;
+  font-size: 1.1rem;
+  letter-spacing: 0.2em;
+  color: var(--ui-paper);
+  text-shadow: 2px 2px 0 var(--ui-ink);
+}
+
+.number {
+  margin: 0;
+  font-size: clamp(6rem, 28vw, 13rem);
+  line-height: 1;
+  color: var(--ui-yellow);
+  -webkit-text-stroke: 4px var(--ui-ink);
+  text-shadow: 8px 8px 0 var(--ui-ink);
+  animation: slam 0.35s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.banner {
+  position: relative;
+  width: min(94vw, 900px);
+  padding: 20px 14px 22px;
+  background: repeating-linear-gradient(-45deg, var(--ui-red) 0 22px, #a52c20 22px 44px);
+  border: 6px solid var(--ui-ink);
+  box-shadow: 10px 10px 0 var(--ui-ink);
+  transform: rotate(-4deg);
+  animation: poster 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.ko {
+  margin: 0;
+  font-size: clamp(2.6rem, 13vw, 7rem);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: var(--ui-yellow);
+  -webkit-text-stroke: 3px var(--ui-ink);
+  text-shadow: 6px 6px 0 var(--ui-ink);
+}
+
+.note {
+  margin: 10px 0 0;
+  font-family: var(--font-body);
+  font-size: clamp(0.8rem, 3.2vw, 1.1rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--ui-paper);
+  text-shadow: 2px 2px 0 var(--ui-ink);
+}
+
+@keyframes ring {
+  from {
+    transform: rotate(-3deg);
+  }
+  to {
+    transform: rotate(3deg) scale(1.04);
+  }
+}
+
+@keyframes slam {
+  from {
+    opacity: 0;
+    transform: scale(2.6);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes poster {
+  from {
+    opacity: 0;
+    transform: rotate(-12deg) scale(2.2);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-4deg);
+  }
+}

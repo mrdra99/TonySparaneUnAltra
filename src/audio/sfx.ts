@@ -14,6 +14,9 @@ export type SfxName =
   | 'achievement'
   | 'cazzateUp'
   | 'finale'
+  | 'ringBell'
+  | 'stationChime'
+  | 'taxiHorn'
   | 'blip';
 
 export interface AudioSettings {
@@ -238,6 +241,29 @@ const RECIPES: Readonly<Record<Exclude<SfxName, 'blip'>, Recipe>> = {
   cazzateUp: (c, out, t) => {
     tone(c, out, t, 380, 0.22, { type: 'sawtooth', gain: 0.08, slideTo: 980, lowpass: 2200 });
     tone(c, out, t + 0.2, 300, 0.14, { type: 'sine', gain: 0.2, slideTo: 150 });
+  },
+  // campanella da ring: colpo metallico con armoniche inarmoniche e coda lunga
+  ringBell: (c, out, t) => {
+    for (const at of [0, 0.42, 0.84]) {
+      tone(c, out, t + at, 1180, 0.55, { type: 'sine', gain: 0.2 });
+      tone(c, out, t + at, 1770, 0.4, { type: 'sine', gain: 0.1 });
+      tone(c, out, t + at, 2950, 0.22, { type: 'triangle', gain: 0.07 });
+      noise(c, out, t + at, 0.05, 0.07, 4200);
+    }
+  },
+  // "din-don" di stazione: due note morbide discendenti
+  stationChime: (c, out, t) => {
+    tone(c, out, t, 880, 0.55, { type: 'sine', gain: 0.22 });
+    tone(c, out, t, 1320, 0.4, { type: 'sine', gain: 0.07 });
+    tone(c, out, t + 0.5, 698.46, 0.8, { type: 'sine', gain: 0.22 });
+    tone(c, out, t + 0.5, 1047, 0.5, { type: 'sine', gain: 0.07 });
+  },
+  // clacson di taxi: due colpi di terza ravvicinati
+  taxiHorn: (c, out, t) => {
+    for (const at of [0, 0.3]) {
+      tone(c, out, t + at, 392, 0.22, { type: 'square', gain: 0.1, lowpass: 1400 });
+      tone(c, out, t + at, 494, 0.22, { type: 'square', gain: 0.08, lowpass: 1400 });
+    }
   },
   // "ta-daaa" + trombetta comica che scivola giu'
   finale: (c, out, t) => {

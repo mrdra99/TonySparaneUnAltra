@@ -13,6 +13,7 @@ import { DEFAULT_SETTINGS } from '@/game/core/settings';
 import { prefersReducedMotion } from '@/game/core/device';
 import { interactionRegistry } from '@/game/interactions/registry';
 import { content } from '@/data';
+import { flashbackSpawn } from '@/levels/intercity/logic/spawns';
 import { PIAZZA_POINTS } from '@/world/environments/piazzaColliders';
 import { createGameStore, type GameStore } from './createGameStore';
 import { runtime } from './runtime';
@@ -29,6 +30,10 @@ export const gameStore = createGameStore({
     position: PIAZZA_POINTS.spawn,
     rotationY: PIAZZA_POINTS.spawnRotationY,
     anim: 'idle',
+  },
+  levelPose: (level) => {
+    const sp = flashbackSpawn(level);
+    return { position: sp.position, rotationY: sp.rotationY, anim: 'idle' };
   },
   menuPose: {
     position: PIAZZA_POINTS.spawn,

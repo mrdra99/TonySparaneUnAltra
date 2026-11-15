@@ -14,6 +14,7 @@ import { MAX_NOTIFICATIONS, TRANSIENT_DIALOGUE_PREFIX } from '@/game/core/consta
 import { createGameSave, loadGame, saveGame, type StorageLike } from '@/game/core/save';
 import { sanitizeSettings } from '@/game/core/settings';
 import type {
+  Vec2,
   Dialogue,
   DialogueEffect,
   GameContent,
@@ -30,6 +31,20 @@ import {
   type DialogueState,
   type DialogueStep,
 } from '@/game/dialogue/engine';
+import {
+  FINALE_MISSION_ID,
+  FINALE_START_INTERACTABLE_ID,
+  FLAGS as FINALE_FLAGS,
+  type FlashbackLevelId,
+  type LevelId,
+} from '@/levels/intercity/logic/ids';
+import {
+  DELAY_ANNOUNCEMENT,
+  initialCountdown,
+  isFinaleUnlocked,
+  stepCountdown,
+  stripSessionFlags,
+} from '@/levels/intercity/logic/rules';
 import { isInteractableEnabled, type InteractionRegistry } from '@/game/interactions/registry';
 import {
   createRandomStoryPicker,
@@ -66,8 +81,30 @@ export interface CelebrationState {
   nonce: number;
 }
 
+/** Cambio di livello in corso (cartolina): la fase e' 'intro' finche' non termina. */
+export interface LevelTransition {
+  to: LevelId;
+  /** Cambia a ogni transizione: la UI lo usa come key. */
+  nonce: number;
+  /** True dopo `swapLevel` (schermo nero: il nuovo livello e' montato). */
+  swapped: boolean;
+}
+
+/** Stato NON persistito del flashback "La notte dell'Intercity". */
+export interface FinaleSession {
+  countdownSec: number;
+  /** Ritardi annunciati dall'Intercity (il timer scaduto non e' mai un game over). */
+  delays: number;
+  /** Date.now() di inizio del K.O. tecnico, null se non e' in corso. */
+  koStartedAt: number | null;
+}
+
 export interface GameState {
   phase: GamePhase;
+  /** Livello montato (non persistito: dopo un reload si riparte sempre dalla piazza). */
+  level: LevelId;
+  levelTransition: LevelTransition | null;
+  finale: FinaleSession;
   panel: Panel;
   /** True se il pannello e' stato aperto da 'M' durante il gioco (chiudendolo si riprende). */
   panelFromGameplay: boolean;
@@ -120,6 +157,20 @@ export interface GameActions {
   advanceTutorial(from: TutorialStep): void;
   clearCelebration(): void;
   revealEnding(): void;
+  /** Piazza -> flashback: richiede il racconto sbloccato. Restituisce true se parte. */
+  beginFinale(): boolean;
+  /** Avvia la cartolina verso `to` (solo da 'playing'). */
+  startLevelTransition(to: LevelId): boolean;
+  /** A schermo nero: monta il livello di destinazione e riposiziona Tony. */
+  swapLevel(): void;
+  /** Fine della cartolina: si riprende a giocare. */
+  endLevelTransition(): void;
+  /** Avanza il countdown dell'Intercity di `dtSec`. Restituisce true se e' scaduto (ritardo). */
+  finaleTick(dtSec: number): boolean;
+  /** Inizia la scena del K.O. tecnico (fase bloccata, camera su Bogdan). */
+  startKo(target: Vec2): void;
+  /** Fine della scena: Cazzatometro a 100 -> messaggio, celebrazione, schermata finale. */
+  finishKo(): void;
 }
 
 export type GameStore = GameState & GameActions;
@@ -138,6 +189,8 @@ export interface GameStoreDeps {
   spawnPose: PlayerPose;
   /** Posa di Tony nel menu principale. */
   menuPose: PlayerPose;
+  /** Posa di partenza di una tappa del flashback (default: `spawnPose`). */
+  levelPose?: (level: FlashbackLevelId) => PlayerPose;
   now?: () => number;
   random?: () => number;
   /** Default true. */
@@ -280,9 +333,18 @@ export function createGameStore(deps: GameStoreDeps): GameStoreApi {
     /** Dialoghi transitori attivi (frasi casuali): vivono solo finche' il dialogo e' aperto. */
     const transient = new Map<string, Dialogue>();
 
+    let transitionSeq = 0;
+    const freshFinale = (): FinaleSession => {
+      const c = initialCountdown();
+      return { countdownSec: c.sec, delays: c.delays, koStartedAt: null };
+    };
+
     const beginGame = (progress: PlayerProgress, tutorial: boolean): void => {
       resetPlayer(runtime, deps.spawnPose);
       set({
+        level: 'piazza',
+        levelTransition: null,
+        finale: freshFinale(),
         progress,
         phase: 'intro',
         panel: 'none',
@@ -300,6 +362,9 @@ export function createGameStore(deps: GameStoreDeps): GameStoreApi {
 
     return {
       phase: 'loading',
+      level: 'piazza',
+      levelTransition: null,
+      finale: freshFinale(),
       panel: 'none',
       panelFromGameplay: false,
       progress: initialProgress,
@@ -434,6 +499,7 @@ export function createGameStore(deps: GameStoreDeps): GameStoreApi {
           return false;
         }
         get().advanceTutorial('interact');
+        if (interactableId === FINALE_START_INTERACTABLE_ID) return get().beginFinale();
         const action = def.action;
         switch (action.type) {
           case 'dialogue':
@@ -510,6 +576,9 @@ export function createGameStore(deps: GameStoreDeps): GameStoreApi {
         resetPlayer(runtime, deps.menuPose);
         set((s) => ({
           phase: 'menu',
+          level: 'piazza',
+          levelTransition: null,
+          finale: freshFinale(),
           panel: 'none',
           panelFromGameplay: false,
           dialogue: idleSession,
@@ -552,6 +621,102 @@ export function createGameStore(deps: GameStoreDeps): GameStoreApi {
 
       revealEnding() {
         if (get().phase === 'ending' && !get().endingRevealed) set({ endingRevealed: true });
+      },
+
+      beginFinale() {
+        const s = get();
+        if (s.phase !== 'playing' || s.level !== 'piazza') return false;
+        if (!isFinaleUnlocked(s.progress, content.missionOrder)) return false;
+        // nuova sessione: via i flag di sessione (il flag permanente del K.O. resta)
+        const flags = stripSessionFlags(s.progress.flags);
+        if (flags !== s.progress.flags) set({ progress: { ...s.progress, flags } });
+        set({ finale: freshFinale() });
+        runEffects([{ type: 'startMission', missionId: FINALE_MISSION_ID }]);
+        return get().startLevelTransition('intercity-pisa');
+      },
+
+      startLevelTransition(to) {
+        if (get().phase !== 'playing') return false;
+        runtime.nearestInteractableId = null;
+        set({
+          phase: 'intro',
+          nearbyPrompt: null,
+          nearbyPromptDisabled: false,
+          levelTransition: { to, nonce: ++transitionSeq, swapped: false },
+        });
+        deps.playSfx(to === 'intercity-torre' ? 'taxiHorn' : 'stationChime');
+        return true;
+      },
+
+      swapLevel() {
+        const t = get().levelTransition;
+        if (!t || t.swapped) return;
+        const to = t.to;
+        if (to === 'piazza') resetPlayer(runtime, deps.spawnPose);
+        else resetPlayer(runtime, (deps.levelPose ?? (() => deps.spawnPose))(to));
+        set({
+          level: to,
+          levelTransition: { ...t, swapped: true },
+          ...(to === 'intercity-pisa' ? { finale: freshFinale() } : {}),
+        });
+      },
+
+      endLevelTransition() {
+        if (!get().levelTransition) return;
+        set((s) => ({ levelTransition: null, phase: s.phase === 'intro' ? 'playing' : s.phase }));
+      },
+
+      finaleTick(dtSec) {
+        const s = get();
+        if (s.phase !== 'playing' || s.level !== 'intercity-pisa') return false;
+        const r = stepCountdown({ sec: s.finale.countdownSec, delays: s.finale.delays }, dtSec);
+        set({ finale: { ...s.finale, countdownSec: r.countdown.sec, delays: r.countdown.delays } });
+        if (r.expired) {
+          toast({ kind: 'hint', title: DELAY_ANNOUNCEMENT, icon: 'Clock', durationMs: 4500 });
+          deps.playSfx('stationChime');
+        }
+        return r.expired;
+      },
+
+      startKo(target) {
+        const s = get();
+        if (s.phase !== 'playing' || s.finale.koStartedAt !== null) return;
+        runtime.dialogue.targetX = target[0];
+        runtime.dialogue.targetZ = target[1];
+        runtime.dialogue.hasTarget = true;
+        runtime.dialogue.active = true;
+        set({
+          phase: 'dialogue',
+          nearbyPrompt: null,
+          nearbyPromptDisabled: false,
+          finale: { ...s.finale, koStartedAt: now() },
+        });
+      },
+
+      finishKo() {
+        if (get().finale.koStartedAt === null || get().phase === 'ending') return;
+        // il flag toglie il tetto pre-finale; poi il Cazzatometro sale a 100 (soglia -> ending)
+        runEffects([
+          { type: 'setFlag', flag: FINALE_FLAGS.ko },
+          { type: 'addCazzate', amount: 100, reason: 'K.O. tecnico', onceId: 'finale-ko' },
+        ]);
+        // replay: il 100 era gia' stato incassato, ma il finale va comunque mostrato
+        if (get().phase !== 'ending') {
+          runtime.dialogue.active = false;
+          runtime.dialogue.hasTarget = false;
+          set((st) => ({
+            phase: 'ending',
+            panel: 'none',
+            dialogue: idleSession,
+            endingRevealed: false,
+            celebration: { kind: 'finale', nonce: ++celebrationSeq },
+            progress: {
+              ...st.progress,
+              stats: { ...st.progress.stats, finishedAt: st.progress.stats.finishedAt ?? now() },
+            },
+          }));
+          deps.playSfx('finale');
+        }
       },
     };
   });
