@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import { FINALE_KO_FLAG } from '@/game/progression/cazzatometro';
 import { gameStore } from '@/store/gameStore';
 import { EndingScreen, makeConfetti } from './EndingScreen';
 
@@ -20,7 +21,10 @@ describe('EndingScreen', () => {
   it('prima del reveal mostra i fumetti, dopo la scheda con punteggio e statistiche', () => {
     render(<EndingScreen />);
     act(() =>
-      gameStore.getState().applyEffects([{ type: 'addCazzate', amount: 100, reason: 'Finale' }]),
+      gameStore.getState().applyEffects([
+        { type: 'setFlag', flag: FINALE_KO_FLAG },
+        { type: 'addCazzate', amount: 100, reason: 'Finale' },
+      ]),
     );
     expect(gameStore.getState().phase).toBe('ending');
     expect(screen.getByText('SBAM!')).toBeInTheDocument();
@@ -37,7 +41,10 @@ describe('EndingScreen', () => {
   it('RICOMINCIA e TORNA AL MENU', () => {
     render(<EndingScreen />);
     act(() => {
-      gameStore.getState().applyEffects([{ type: 'addCazzate', amount: 100, reason: 'Finale' }]);
+      gameStore.getState().applyEffects([
+        { type: 'setFlag', flag: FINALE_KO_FLAG },
+        { type: 'addCazzate', amount: 100, reason: 'Finale' },
+      ]);
       gameStore.getState().revealEnding();
     });
     fireEvent.click(screen.getByText('TORNA AL MENU'));

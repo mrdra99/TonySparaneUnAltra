@@ -1,4 +1,5 @@
 import type { SfxName } from '@/audio/sfx';
+import { FINALE_KO_FLAG } from '@/game/progression/cazzatometro';
 import { SAVE_STORAGE_KEY, loadGame, type StorageLike } from '@/game/core/save';
 import { DEFAULT_SETTINGS } from '@/game/core/settings';
 import { createInteractionRegistry, npcToInteractable } from '@/game/interactions/registry';
@@ -225,12 +226,26 @@ describe('SPARANE UN ALTRA', () => {
   });
 });
 
+const KO_EFFECTS = [
+  { type: 'setFlag', flag: FINALE_KO_FLAG },
+  { type: 'addCazzate', amount: 100, reason: 'boom' },
+] as const;
+
 describe('finale a 100', () => {
+  it('senza il K.O. tecnico il Cazzatometro si ferma a 95 e non c e finale', () => {
+    const { store } = setup();
+    play(store);
+    store.getState().applyEffects([{ type: 'addCazzate', amount: 100, reason: 'boom' }]);
+    const s = store.getState();
+    expect(s.progress.cazzate).toBe(95);
+    expect(s.phase).toBe('playing');
+    expect(s.progress.stats.finishedAt).toBeNull();
+  });
   it('raggiungere 100 durante un dialogo passa a ending, chiude il dialogo e lancia la celebrazione', () => {
     const { store, runtime, sfx } = setup();
     play(store);
     store.getState().startDialogue('luca-talk');
-    store.getState().applyEffects([{ type: 'addCazzate', amount: 100, reason: 'boom' }]);
+    store.getState().applyEffects(KO_EFFECTS);
     const s = store.getState();
     expect(s.phase).toBe('ending');
     expect(s.dialogue.state.status).toBe('idle');
@@ -248,7 +263,7 @@ describe('finale a 100', () => {
   it('restart dopo il finale riparte da zero', () => {
     const { store } = setup();
     play(store);
-    store.getState().applyEffects([{ type: 'addCazzate', amount: 100, reason: 'boom' }]);
+    store.getState().applyEffects(KO_EFFECTS);
     store.getState().restart();
     const s = store.getState();
     expect(s.phase).toBe('intro');

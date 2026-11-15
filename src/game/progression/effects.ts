@@ -2,7 +2,8 @@
  * OWNER: Architecture.
  * applyEffect / applyEffects: funzioni PURE (progress, effect, content) -> {progress, events}.
  * - non mutano l'input; se nulla cambia restituiscono la STESSA referenza di progress
- * - Cazzatometro clampato a 0..100, soglie 25/50/75/100 con messaggi esatti
+ * - Cazzatometro clampato a 0..100 con tetto pre-finale (PRE_FINALE_CAP) finche' manca il K.O. tecnico;
+ *   soglie 25/50/75/100 con messaggi esatti
  * - una missione si completa automaticamente quando tutti gli obiettivi sono completati,
  *   e assegna il premio (Cazzatometro, punti, achievement, storia)
  * Effetti con id sconosciuti vengono ignorati (la validazione dei dati e' in validateContent).
@@ -11,7 +12,7 @@ import type { DialogueEffect, GameContent, MissionReward, PlayerProgress } from 
 import {
   CAZZATOMETRO_MAX,
   THRESHOLD_MESSAGES,
-  clampCazzate,
+  addCazzateCapped,
   thresholdsCrossed,
 } from './cazzatometro';
 import type { GameEvent } from './events';
@@ -36,7 +37,7 @@ function addCazzate(
   if (onceId && progress.claimedKeys.includes(onceId)) return NOOP(progress);
   const claimedKeys = onceId ? addToList(progress.claimedKeys, onceId) : progress.claimedKeys;
   const prev = progress.cazzate;
-  const next = clampCazzate(prev + amount);
+  const next = addCazzateCapped(prev, amount, progress.flags);
   const next2: PlayerProgress = { ...progress, cazzate: next, claimedKeys };
   const delta = next - prev;
   if (delta <= 0) {
