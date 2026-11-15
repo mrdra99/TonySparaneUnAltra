@@ -68,7 +68,7 @@ export function GameCanvas() {
         shadows="percentage"
         dpr={[1, preset.dprMax]}
         gl={{ antialias: preset.antialias, powerPreference: 'high-performance' }}
-        camera={{ fov: 55, near: 0.1, far: 200, position: [0, 6, 16] }}
+        camera={{ fov: 55, near: 0.1, far: 400, position: [0, 6, 16] }}
       >
         <Suspense fallback={null}>
           <Lighting quality={qualityProfile} />
