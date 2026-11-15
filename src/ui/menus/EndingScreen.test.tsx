@@ -51,6 +51,20 @@ describe('EndingScreen', () => {
     expect(gameStore.getState().phase).toBe('menu');
   });
 
+  it('dopo il K.O. tecnico mostra il debito totale con Bogdan', () => {
+    render(<EndingScreen />);
+    act(() => {
+      gameStore.getState().applyEffects([
+        { type: 'setFlag', flag: FINALE_KO_FLAG },
+        { type: 'addCazzate', amount: 100, reason: 'Finale' },
+      ]);
+      gameStore.getState().revealEnding();
+    });
+    expect(
+      screen.getByText('Debito totale con Bogdan: 40 € + taxi + una ninna kanna mai ricevuta.'),
+    ).toBeInTheDocument();
+  });
+
   it('i coriandoli sono deterministici', () => {
     expect(makeConfetti(10)).toEqual(makeConfetti(10));
     expect(makeConfetti(10)).toHaveLength(10);

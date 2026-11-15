@@ -3,6 +3,7 @@
 // leggendo lo store (restituisce null quando non pertinente): l'ordine qui sotto e' l'ordine z.
 import { useEffect } from 'react';
 import { attachKeyboard } from '@/game/core/input';
+import { FinaleController } from '@/levels/intercity/FinaleController';
 import { useGameStore } from '@/store/gameStore';
 import { Hud } from '@/ui/hud/Hud';
 import { DialoguePanel } from '@/ui/dialogues/DialoguePanel';
@@ -13,6 +14,9 @@ import { MainMenu } from '@/ui/menus/MainMenu';
 import { MissionLog } from '@/ui/menus/MissionLog';
 import { PauseMenu } from '@/ui/menus/PauseMenu';
 import { Settings } from '@/ui/menus/Settings';
+import { FinaleHud } from '@/ui/finale/FinaleHud';
+import { KoOverlay } from '@/ui/finale/KoOverlay';
+import { LevelTransition } from '@/ui/finale/LevelTransition';
 import { Notifications } from '@/ui/notifications/Notifications';
 import { TouchControls } from '@/ui/touch/TouchControls';
 import styles from './App.module.css';
@@ -34,9 +38,12 @@ export function App() {
       <GameCanvas />
       <div className={styles.overlay}>
         <Hud />
+        <FinaleHud />
         <TouchControls />
         <DialoguePanel />
         <Notifications />
+        <KoOverlay />
+        <LevelTransition />
         <MainMenu />
         <PauseMenu />
         <MissionLog />
@@ -47,6 +54,7 @@ export function App() {
       </div>
       <GlobalActions />
       <PhaseTimers />
+      <FinaleController />
     </div>
   );
 }
