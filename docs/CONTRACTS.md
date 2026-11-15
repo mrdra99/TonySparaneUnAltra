@@ -302,3 +302,18 @@ bloccato → il gioco parte da zero senza eccezioni. Per cambiare lo schema: `SA
 - Contenuti: **satira surreale**; niente violenza, armi, sostanze o sessualità esplicita; riferimenti a persone reali
   chiaramente fittizi (vedi `GAME_DESIGN.md`).
 - Commit: Conventional Commits; ogni commit compila e passa typecheck/lint/test/build.
+
+## 8. Livelli e finale ("La notte dell'Intercity")
+
+- `store.level: 'piazza' | 'intercity-pisa' | 'intercity-viareggio' | 'intercity-torre'` (non persistito: dopo un
+  reload si riparte dalla piazza). `GameCanvas` monta un solo livello: `PiazzaLevel` (`src/app`, contiene Piazza,
+  Npcs, InteractionSystem e il punto che lancia il racconto) oppure `FinaleLevel` (`src/levels/intercity`, con
+  `LevelInteractionSystem`). Gli NPC e gli interagibili della piazza non esistono nei livelli del flashback.
+- Sblocco: tutte le missioni di `content.missionOrder` tranne `notte-intercity` completate -> interagibile
+  `finale:start` (gestito da `store.interact` -> `beginFinale`). Cambio livello: `startLevelTransition(to)` (fase
+  `intro`) -> overlay `LevelTransition` -> `swapLevel()` a schermo nero (spawn della tappa) -> `endLevelTransition()`.
+- Le tappe si chiudono con flag di sessione (`finale.s.*`, azzerati a ogni avvio) valutati da `advanceStage`
+  (puro, `src/levels/intercity/logic/rules.ts`); `FinaleController` li osserva e cambia tappa a dialogo chiuso.
+- Cazzatometro: tetto `PRE_FINALE_CAP = 95` finche' non c'e' il flag permanente `finale.ko`; solo `store.finishKo()`
+  (fine della scena del K.O. tecnico) lo accende e porta a 100 -> `thresholdReached 100` -> fase `ending`.
+- Contenuti del livello: `src/levels/intercity/data/**`, registrati in `src/data/index.ts`.
