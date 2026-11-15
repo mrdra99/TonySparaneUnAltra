@@ -214,3 +214,10 @@
     height: 38px;
   }
 }
+
+/* su touch i pulsanti pausa/missioni stanno sotto il Cazzatometro: i toast scendono */
+@media (pointer: coarse) and (max-width: 640px) {
+  .stack {
+    top: calc(var(--safe-top) + 122px);
+  }
+}

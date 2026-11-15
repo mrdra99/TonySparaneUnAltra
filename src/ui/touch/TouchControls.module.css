@@ -1,0 +1,232 @@
+.root {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-touch);
+  overflow: hidden;
+  font-family: var(--font-body);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  pointer-events: none;
+}
+
+.moveZone,
+.lookZone {
+  position: absolute;
+  bottom: 0;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.moveZone {
+  top: 18%;
+  left: 0;
+  width: 50%;
+}
+
+.lookZone {
+  top: 0;
+  right: 0;
+  width: 50%;
+}
+
+/* indicatore statico: dove si trova il joystick quando nessuno lo tocca */
+.joyHint {
+  position: absolute;
+  left: calc(var(--safe-left) + 34px);
+  bottom: calc(var(--safe-bottom) + 34px);
+  width: 96px;
+  height: 96px;
+  border: 3px dashed var(--ui-paper);
+  border-radius: 50%;
+  background: rgb(22 33 62 / 0.35);
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.joyBase {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: none;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.joyBase[data-active='true'] {
+  display: block;
+}
+
+.joyBase::before {
+  content: '';
+  position: absolute;
+  left: -64px;
+  top: -64px;
+  width: 128px;
+  height: 128px;
+  background: rgb(22 33 62 / 0.55);
+  border: 3px solid var(--ui-paper);
+  border-radius: 50%;
+}
+
+.joyThumb {
+  position: absolute;
+  left: -26px;
+  top: -26px;
+  width: 52px;
+  height: 52px;
+  background: var(--ui-orange);
+  border: 3px solid var(--ui-ink);
+  border-radius: 50%;
+  box-shadow: 0 3px 0 var(--ui-ink);
+}
+
+/* con il joystick in uso nasconde l'indicatore fisso */
+.root:has(.joyBase[data-active='true']) .joyHint {
+  opacity: 0;
+}
+
+.topButtons {
+  position: absolute;
+  top: calc(var(--safe-top) + 64px);
+  right: calc(var(--safe-right) + 8px);
+  display: flex;
+  gap: 8px;
+}
+
+.roundBtn {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  color: var(--ui-ink);
+  background: var(--ui-paper);
+  border: var(--ui-border);
+  border-radius: 50%;
+  box-shadow: var(--ui-shadow-sm);
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+.roundBtn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--ui-ink);
+}
+
+.actions {
+  position: absolute;
+  right: calc(var(--safe-right) + 14px);
+  bottom: calc(var(--safe-bottom) + 18px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  max-width: calc(100% - var(--safe-left) - var(--safe-right) - 160px);
+}
+
+.run,
+.interact {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--ui-ink);
+  border: var(--ui-border);
+  box-shadow: var(--ui-shadow);
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.run {
+  min-width: 64px;
+  height: 52px;
+  padding: 0 14px;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  background: var(--ui-paper);
+  border-radius: 999px;
+}
+
+.run[data-pressed='true'] {
+  background: var(--ui-yellow);
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 0 var(--ui-ink);
+}
+
+.interact {
+  min-width: 72px;
+  height: 72px;
+  padding: 0;
+  background: var(--ui-ink-soft);
+  color: var(--ui-paper);
+  border-color: var(--ui-paper);
+  border-radius: 50%;
+  opacity: 0.8;
+  transition: border-radius 0.15s;
+  touch-action: manipulation;
+}
+
+/* c'e' qualcosa con cui interagire: pillola arancio con l'etichetta */
+.hasPrompt {
+  max-width: 100%;
+  min-height: 72px;
+  height: auto;
+  padding: 8px 18px 8px 16px;
+  color: var(--ui-ink);
+  background: var(--ui-orange);
+  border-color: var(--ui-ink);
+  border-radius: 36px;
+  opacity: 1;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.unavailable {
+  color: var(--ui-paper);
+  background: var(--ui-ink-soft);
+  border: 3px dashed var(--ui-paper);
+  animation: none;
+}
+
+.promptText {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+@keyframes pulse {
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+@media (max-height: 460px) {
+  .joyHint {
+    bottom: calc(var(--safe-bottom) + 20px);
+  }
+  .interact {
+    min-width: 64px;
+    height: 64px;
+  }
+  .hasPrompt {
+    min-height: 64px;
+  }
+  .promptText {
+    font-size: 1rem;
+  }
+  .actions {
+    bottom: calc(var(--safe-bottom) + 10px);
+    gap: 8px;
+  }
+  .run {
+    height: 46px;
+  }
+}
