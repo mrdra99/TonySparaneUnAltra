@@ -151,7 +151,7 @@ const talk = (c: FinaleCharacter): LevelInteractable => ({
   },
 });
 
-export const PISA_DOOR_POS: Vec2 = [7, -2.1];
+export const PISA_DOOR_POS: Vec2 = [10.4, -2.1];
 export const PISA_VENDING_POS: Vec2 = [-4, 7.4];
 export const TAXI_DOOR_POS: Vec2 = [8, -0.2];
 
