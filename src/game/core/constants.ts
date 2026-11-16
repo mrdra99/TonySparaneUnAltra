@@ -1,6 +1,7 @@
 /** OWNER: Architecture. Costanti di gioco condivise (unita' = metri, secondi, radianti). */
 
 // Player
+export const PLAYER_DISPLAY_NAME = 'Fissshher Tonyo';
 export const PLAYER_RADIUS = 0.4;
 export const PLAYER_WALK_SPEED = 2.8;
 export const PLAYER_RUN_SPEED = 5.6;

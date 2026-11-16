@@ -1,4 +1,5 @@
 /** Regole PURE del livello: pazienza di Bogdan, colletta, countdown, tappe, sblocco. */
+import { PLAYER_DISPLAY_NAME } from '@/game/core/constants';
 import type { PlayerProgress } from '@/game/core/types';
 import { SESSION_FLAG_PREFIX, FINALE_MISSION_ID, FLAGS, FLASHBACK_STAGES } from './ids';
 import type { FlashbackLevelId, LevelId } from './ids';
@@ -97,7 +98,7 @@ export function collettaState(flags: readonly string[]): CollettaState {
       amount: has(FLAGS.colBogdan) ? share * 2 : null,
       note: 'la sua + quella di Tony',
     },
-    { id: 'tony', name: 'Tony', amount: 0, note: 'ci ha provato' },
+    { id: 'tony', name: PLAYER_DISPLAY_NAME, amount: 0, note: 'ci ha provato' },
   ];
   const collected = rows.reduce((sum, r) => sum + (r.amount ?? 0), 0);
   return {

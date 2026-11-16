@@ -6,6 +6,7 @@ import {
   type NpcAppearance,
 } from '@/game/core/types';
 import { ASSET_PATHS } from '@/data/assets';
+import { PLAYER_DISPLAY_NAME } from '@/game/core/constants';
 
 export interface SpeakerInfo {
   id: string;
@@ -17,7 +18,7 @@ export interface SpeakerInfo {
 
 export function resolveSpeaker(speakerId: string, content: GameContent): SpeakerInfo {
   if (speakerId === SPEAKER_TONY) {
-    return { id: speakerId, name: 'Tony', portrait: ASSET_PATHS.tonyPortrait };
+    return { id: speakerId, name: PLAYER_DISPLAY_NAME, portrait: ASSET_PATHS.tonyPortrait };
   }
   if (speakerId === SPEAKER_NARRATOR) return { id: speakerId, name: '', portrait: null };
   const npc = content.npcs.find((n) => n.id === speakerId);
